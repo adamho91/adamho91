@@ -1,21 +1,6 @@
 // Main script file for folio functionality
-// Styles for the elements
+// Styles for the elements (only click indicator, no bellissimo styling)
 const styles = `
-    #bellissimo {
-        width: 100px;
-        height: 100px;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #1a1a1a;
-        z-index: 9999;
-        transition: transform 0.3s ease;
-    }
-    
-    #bellissimo.pulse {
-        transform: scale(1.1);
-    }
-    
     .click-indicator {
         position: absolute;
         width: 20px;
