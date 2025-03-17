@@ -94,11 +94,13 @@ function initializeDitherPattern() {
         let size = 25;
         let grid = [];
         let frameCount = 0;
-        let patternIntensity = 0;
-        let currentColor = '#ffffff';
+        let patternIntensity = 0.5; // Start with some intensity
+        let currentColor = '#ffffff'; // Start with white
         let targetColor = '#ffffff';
         let isScrolling = false;
         let pulseIntensity = 0;
+        let flashColor = null;
+        let flashDuration = 0;
         
         // Class colors array for sparkles
         const classColors = [
@@ -113,10 +115,26 @@ function initializeDitherPattern() {
             p.noSmooth();
             p.frameRate(4);
             
-            // Event Listeners - only keep click for pulse effect
+            // General click event for pulse effect
             document.addEventListener('click', () => {
                 pulseIntensity = 1;
                 patternIntensity = 1;
+            });
+            
+            // Special click events for featured images and case study previews
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('featured-img') || 
+                    e.target.classList.contains('case-study-preview-image') ||
+                    e.target.closest('.featured-img') || 
+                    e.target.closest('.case-study-preview-image')) {
+                    
+                    // Get a random color from the classColors array
+                    flashColor = classColors[Math.floor(p.random(classColors.length))];
+                    flashDuration = 3; // Flash for 3 frames
+                    
+                    // Also set as the target color for a lasting effect
+                    targetColor = flashColor;
+                }
             });
         };
         
@@ -144,6 +162,14 @@ function initializeDitherPattern() {
         }
         
         function calculateCellValue(i, j) {
+            // If we're flashing, return full intensity
+            if (flashDuration > 0) {
+                return {
+                    intensity: 1,
+                    sparkle: false
+                };
+            }
+            
             let value = 0;
             let cornerEffect = getCornerBias(i, j);
             let cornerBiasStrength = 0.6 + (pulseIntensity * 0.4);
@@ -186,33 +212,39 @@ function initializeDitherPattern() {
         }
         
         p.draw = function() {
-            p.background('#1a1a1a');
-            
-            currentColor = lerpColor(currentColor, targetColor, 0.1);
-            
-            frameCount++;
-            initializeGrid();
-            
-            pulseIntensity *= 0.9;
-            
-            let cellSize = p.width / size;
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    let x = i * cellSize;
-                    let y = j * cellSize;
-                    let cell = grid[i][j];
-                    
-                    let c;
-                    if (cell.sparkle && cell.intensity > 0) {
-                        // Use a random class color for sparkle
-                        c = p.color(getRandomClassColor());
-                    } else {
-                        c = p.color(currentColor);
+            // If we're flashing, use the flash color as background
+            if (flashDuration > 0) {
+                p.background(flashColor);
+                flashDuration--;
+            } else {
+                p.background('#1a1a1a');
+                
+                currentColor = lerpColor(currentColor, targetColor, 0.1);
+                
+                frameCount++;
+                initializeGrid();
+                
+                pulseIntensity *= 0.9;
+                
+                let cellSize = p.width / size;
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        let x = i * cellSize;
+                        let y = j * cellSize;
+                        let cell = grid[i][j];
+                        
+                        let c;
+                        if (cell.sparkle && cell.intensity > 0) {
+                            // Use a random class color for sparkle
+                            c = p.color(getRandomClassColor());
+                        } else {
+                            c = p.color(currentColor);
+                        }
+                        
+                        p.fill(p.lerpColor(p.color('#1a1a1a'), c, cell.intensity));
+                        p.noStroke();
+                        p.rect(x, y, cellSize + 1, cellSize + 1);
                     }
-                    
-                    p.fill(p.lerpColor(p.color('#1a1a1a'), c, cell.intensity));
-                    p.noStroke();
-                    p.rect(x, y, cellSize + 1, cellSize + 1);
                 }
             }
         };
