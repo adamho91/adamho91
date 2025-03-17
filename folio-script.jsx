@@ -6,14 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add required styles
     addStyles();
     
-    // Initialize preview functionality
-    initializePreviewSystem();
-    
-    // Initialize animation system
-    initializeAnimationSystem();
-    
     // Initialize dither pattern
     initializeDitherPattern();
+    
+    // Add simple click position tracking
+    initializeClickTracking();
 });
 
 // Load external libraries
@@ -35,64 +32,6 @@ function loadExternalLibraries() {
 function addStyles() {
     const style = document.createElement('style');
     style.textContent = `
-        @media (min-width: 991px) {
-            .rpg-container {
-                position: fixed;
-                width: 400px;
-                overflow: hidden;
-                display: none;
-                z-index: 9999;
-                bottom: 8px;
-                left: 8px;
-                background: white;
-                pointer-events: none;
-            }
-            .rpg-container img {
-                width: 100%;
-                height: auto;
-                display: block;
-            }
-            .preview-stack {
-                position: fixed;
-                bottom: 8px;
-                left: 8px;
-                z-index: 9999;
-                display: flex;
-                gap: 8px;
-                pointer-events: none;
-                align-items: flex-end;
-            }
-            .preview-item {
-                background: white;
-                opacity: 1;
-                transition: opacity 0.3s ease;
-                width: 400px;
-            }
-            .preview-item img {
-                width: 100%;
-                height: auto;
-                display: block;
-                vertical-align: bottom;
-            }
-            .preview-item.fading {
-                opacity: 0;
-            }
-        }
-        
-        .serially {
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-        }
-        
-        .fade-in {
-            opacity: 1;
-        }
-        
-        .fade-out {
-            opacity: 0 !important;
-            transition: opacity 0.3s ease-out;
-        }
-        
         #ditherdiv {
             width: 100px;
             height: 100px;
@@ -108,325 +47,43 @@ function addStyles() {
             transform: scale(1.1);
         }
         
-        .xp-gain {
+        .click-indicator {
             position: absolute;
-            color: #fff;
-            background: rgba(0,0,0,0.7);
-            padding: 4px 8px;
-            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
             pointer-events: none;
-            animation: float-up 0.5s ease-out forwards;
-            z-index: 10000;
+            z-index: 9998;
+            animation: click-ripple 0.8s ease-out forwards;
         }
         
-        @keyframes float-up {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-20px); opacity: 0; }
-        }
-        
-        @keyframes classUp {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+        @keyframes click-ripple {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
         }
     `;
     document.head.appendChild(style);
 }
 
-// Initialize preview system
-function initializePreviewSystem() {
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'rpg-container';
-    document.body.appendChild(previewContainer);
-
-    const stackContainer = document.createElement('div');
-    stackContainer.className = 'preview-stack';
-    document.body.appendChild(stackContainer);
-
-    let stackItems = [];
-    let hoverTimeout;
-    let currentHoverElement = null;
-    let isTouch = false;
-
-    const isDesktop = () => window.innerWidth >= 991;
-
-    const getWidthForPosition = (position, totalItems) => {
-        if (totalItems <= 5) return 400;
-        if (position === 0) return 400;
-        if (position === 1) return 200;
-        if (position === 2) return 150;
-        if (position === 3) return 100;
-        return 50;
-    };
-
-    const updateStackSizes = () => {
-        if (!isDesktop()) return;
-        stackItems.forEach((item, index) => {
-            const width = getWidthForPosition(index, stackItems.length);
-            item.style.width = `${width}px`;
-        });
-    };
-
-    window.addEventListener('touchstart', function onFirstTouch() {
-        isTouch = true;
-        window.removeEventListener('touchstart', onFirstTouch);
-    });
-
-    window.addEventListener('resize', () => {
-        if (!isDesktop()) {
-            stackItems.forEach(item => item.remove());
-            stackItems = [];
-            previewContainer.style.display = 'none';
-        }
-    });
-
-    const showPreview = (img, immediate = false) => {
-        if (!isDesktop()) return;
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(() => {
-            if (currentHoverElement === img && stackItems.length === 0) { // Only show preview if no stack exists
-                const previewImg = new Image();
-                previewImg.src = img.src;
-                previewContainer.innerHTML = '';
-                previewContainer.appendChild(previewImg);
-                previewContainer.style.display = 'block';
-            }
-        }, immediate ? 0 : 50);
-    };
-
-    const hidePreview = () => {
-        if (!isDesktop()) return;
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(() => {
-            currentHoverElement = null;
-            if (stackItems.length === 0) { // Only hide if no stack exists
-                previewContainer.style.display = 'none';
-            }
-        }, 50);
-    };
-
-    // Add event listeners once elements are available
-    setTimeout(() => {
-        document.querySelectorAll('.case-study-preview-image').forEach(img => {
-            img.addEventListener('mouseenter', (e) => {
-                if (isTouch || !isDesktop()) return;
-                if (e.target === img) {
-                    currentHoverElement = img;
-                    showPreview(img);
-                }
-            });
-            
-            img.addEventListener('mouseleave', (e) => {
-                if (isTouch || !isDesktop()) return;
-                if (e.target === img && !e.relatedTarget?.closest('.case-study-preview-image')) {
-                    hidePreview();
-                }
-            });
-
-            img.addEventListener('click', () => {
-                if (!isDesktop()) return;
-
-                // If this is the first click, hide the preview container
-                if (stackItems.length === 0) {
-                    previewContainer.style.display = 'none';
-                }
-
-                const stackItem = document.createElement('div');
-                stackItem.className = 'preview-item';
-                const stackImg = new Image();
-                stackImg.src = img.src;
-                stackItem.appendChild(stackImg);
-                
-                stackItems.unshift(stackItem);
-                stackContainer.prepend(stackItem);
-                updateStackSizes();
-
-                setTimeout(() => {
-                    stackItem.classList.add('fading');
-                    setTimeout(() => {
-                        const index = stackItems.indexOf(stackItem);
-                        if (index > -1) {
-                            stackItems.splice(index, 1);
-                            stackItem.remove();
-                            updateStackSizes();
-                        }
-                    }, 300);
-                }, 3000);
-            });
-        });
-    }, 500);
-
-    let lastMouseMove = 0;
-    document.addEventListener('mousemove', (e) => {
-        if (isTouch || !isDesktop()) return;
+// Initialize click tracking
+function initializeClickTracking() {
+    document.addEventListener('click', (e) => {
+        // Create click indicator
+        const clickIndicator = document.createElement('div');
+        clickIndicator.className = 'click-indicator';
+        clickIndicator.style.left = `${e.clientX}px`;
+        clickIndicator.style.top = `${e.clientY}px`;
+        document.body.appendChild(clickIndicator);
         
-        const now = Date.now();
-        if (now - lastMouseMove > 100) {
-            lastMouseMove = now;
-            const hoveredImg = e.target.closest('.case-study-preview-image');
-            if (hoveredImg && hoveredImg !== currentHoverElement) {
-                currentHoverElement = hoveredImg;
-                showPreview(hoveredImg, true);
-            }
-        }
-    });
-}
-
-// Initialize animation system
-function initializeAnimationSystem() {
-    // Animation control
-    let isAnimating = true;
-    let currentTimeout = null;
-    let scrollTimeout = null;
-    let isScrollFading = false;
-
-    // Function to shuffle only the content
-    function shuffleContent() {
-        const elements = Array.from(document.querySelectorAll('.serially'));
-        if (elements.length === 0) return;
+        // Remove after animation completes
+        setTimeout(() => {
+            clickIndicator.remove();
+        }, 800);
         
-        const contents = elements.map(el => el.textContent);
-        
-        // Fisher-Yates shuffle of contents
-        for (let i = contents.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [contents[i], contents[j]] = [contents[j], contents[i]];
-        }
-        
-        // Apply shuffled contents back to elements
-        elements.forEach((el, i) => {
-            el.textContent = contents[i];
-        });
-    }
-
-    // Function to instantly fade out all elements (for click)
-    function instantFadeOutAll() {
-        isAnimating = false;
-        isScrollFading = false;
-        if (currentTimeout) {
-            clearTimeout(currentTimeout);
-        }
-        
-        document.querySelectorAll('.serially').forEach(el => {
-            el.classList.remove('fade-in');
-            el.classList.add('fade-out');
-        });
-    }
-
-    // Function to rhythmically fade out elements (for scroll)
-    function rhythmicFadeOut() {
-        if (!isScrollFading) return;
-        
-        const visibleElements = Array.from(document.querySelectorAll('.serially.fade-in'));
-        if (visibleElements.length === 0) {
-            isScrollFading = false;
-            return;
-        }
-        
-        // Faster rhythm patterns
-        const rhythms = [
-            [50, 100, 25, 150, 75, 125],
-            [150, 150, 150, 50, 50, 50],
-            [100, 25, 100, 25, 100, 25],
-            [200, 50, 50, 200, 50, 50]
-        ];
-        
-        const currentRhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
-        let rhythmIndex = 0;
-        
-        function fadeNextOut() {
-            if (!isScrollFading || visibleElements.length === 0) return;
-            
-            const randomIndex = Math.floor(Math.random() * visibleElements.length);
-            const element = visibleElements[randomIndex];
-            
-            element.classList.remove('fade-in');
-            element.classList.add('fade-out');
-            visibleElements.splice(randomIndex, 1);
-            
-            if (visibleElements.length > 0) {
-                const delay = currentRhythm[rhythmIndex % currentRhythm.length];
-                rhythmIndex++;
-                setTimeout(fadeNextOut, delay);
-            }
-        }
-        
-        fadeNextOut();
-    }
-
-    // Regular animation function for fade-in
-    function animateElements() {
-        const elements = Array.from(document.querySelectorAll('.serially:not(.fade-in)'));
-        if (elements.length === 0 || !isAnimating) return;
-        
-        const rhythms = [
-            [100, 200, 50, 300, 150, 250],
-            [300, 300, 300, 100, 100, 100],
-            [200, 50, 200, 50, 200, 50],
-            [400, 100, 100, 400, 100, 100]
-        ];
-        
-        const currentRhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
-        let rhythmIndex = 0;
-        
-        function fadeNext() {
-            if (elements.length === 0 || !isAnimating) return;
-            
-            const randomIndex = Math.floor(Math.random() * elements.length);
-            const element = elements[randomIndex];
-            
-            element.classList.add('fade-in');
-            elements.splice(randomIndex, 1);
-            
-            if (elements.length > 0 && isAnimating) {
-                const delay = currentRhythm[rhythmIndex % currentRhythm.length];
-                rhythmIndex++;
-                currentTimeout = setTimeout(fadeNext, delay);
-            }
-        }
-        
-        fadeNext();
-    }
-
-    // Click handler
-    document.addEventListener('click', instantFadeOutAll);
-
-    // Scroll handler with debounce
-    document.addEventListener('scroll', () => {
-        if (scrollTimeout) {
-            clearTimeout(scrollTimeout);
-        }
-
-        scrollTimeout = setTimeout(() => {
-            if (isAnimating && !isScrollFading) {
-                isAnimating = false;
-                isScrollFading = true;
-                if (currentTimeout) {
-                    clearTimeout(currentTimeout);
-                }
-                rhythmicFadeOut();
-            }
-        }, 50);
-    }, { passive: true });
-
-    // Initialize animation
-    setTimeout(() => {
-        shuffleContent();
-        animateElements();
-    }, 500);
-
-    // Optional: Press 'R' to restart
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'r' || e.key === 'R') {
-            isAnimating = true;
-            isScrollFading = false;
-            const elements = document.querySelectorAll('.serially');
-            elements.forEach(el => {
-                el.classList.remove('fade-in', 'fade-out');
-            });
-            shuffleContent();
-            setTimeout(animateElements, 100);
-        }
+        // Log click position
+        console.log(`Click at: X=${e.clientX}, Y=${e.clientY}`);
     });
 }
 
@@ -468,18 +125,11 @@ function initializeDitherPattern() {
                     p.noSmooth();
                     p.frameRate(4);
                     
-                    // Event Listeners
+                    // Event Listeners - only keep click for pulse effect
                     document.addEventListener('click', () => {
                         pulseIntensity = 1;
                         patternIntensity = 1;
                     });
-            
-                    document.addEventListener('scroll', () => {
-                        isScrolling = true;
-                        setTimeout(() => {
-                            isScrolling = false;
-                        }, 50);
-                    }, { passive: true });
                 };
                 
                 function getRandomClassColor() {
