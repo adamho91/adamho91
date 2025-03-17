@@ -32,7 +32,7 @@ function loadExternalLibraries() {
 function addStyles() {
     const style = document.createElement('style');
     style.textContent = `
-        #ditherdiv {
+        #bellissimo {
             width: 100px;
             height: 100px;
             position: fixed;
@@ -43,7 +43,7 @@ function addStyles() {
             transition: transform 0.3s ease;
         }
         
-        #ditherdiv.pulse {
+        #bellissimo.pulse {
             transform: scale(1.1);
         }
         
@@ -89,11 +89,11 @@ function initializeClickTracking() {
 
 // Initialize dither pattern
 function initializeDitherPattern() {
-    // Create dither div if it doesn't exist
-    if (!document.getElementById('ditherdiv')) {
-        const ditherDiv = document.createElement('div');
-        ditherDiv.id = 'ditherdiv';
-        document.body.appendChild(ditherDiv);
+    // Create bellissimo div if it doesn't exist
+    if (!document.getElementById('bellissimo')) {
+        const bellissimoDiv = document.createElement('div');
+        bellissimoDiv.id = 'bellissimo';
+        document.body.appendChild(bellissimoDiv);
     }
 
     // Wait for p5.js to load
@@ -120,7 +120,7 @@ function initializeDitherPattern() {
                 
                 p.setup = function() {
                     let canvas = p.createCanvas(100, 100);
-                    canvas.parent('ditherdiv');
+                    canvas.parent('bellissimo');
                     initializeGrid();
                     p.noSmooth();
                     p.frameRate(4);
