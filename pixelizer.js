@@ -137,6 +137,9 @@
         // Add the canvas to the wrapper
         wrapper.appendChild(canvas);
         
+        // Always ensure the original image is hidden initially
+        img.style.opacity = '0';
+        
         // Fade in the original image and fade out the pixelized canvas after the duration
         setTimeout(() => {
           img.style.opacity = '1';
@@ -144,7 +147,9 @@
           
           // Remove the canvas after transition
           setTimeout(() => {
-            wrapper.removeChild(canvas);
+            if (canvas.parentNode === wrapper) {
+              wrapper.removeChild(canvas);
+            }
           }, this.fadeTime);
         }, this.duration);
       }
@@ -152,13 +157,35 @@
   
     // Initialize the pixelizer when the DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
-      const pixelizer = new ImagePixelizer();
+      const pixelizer = new ImagePixelizer({
+        pixelSize: 40,      // Larger pixels
+        duration: 2000,     // Longer duration
+        fadeTime: 500       // Slower fade
+      });
       pixelizer.init();
     });
   
-    // Also handle images that might load after initial DOM load
+    // Modify this part to avoid duplicate processing
     window.addEventListener('load', function() {
-      const pixelizer = new ImagePixelizer();
-      pixelizer.init();
+      // Only process new images that weren't handled during DOMContentLoaded
+      const pixelizer = new ImagePixelizer({
+        pixelSize: 40,
+        duration: 2000,
+        fadeTime: 500
+      });
+      
+      // Find all images that haven't been processed yet
+      const processedImages = document.querySelectorAll('.featured-img[style*="opacity"], .case-study-preview-image[style*="opacity"]');
+      const allImages = document.querySelectorAll('.featured-img, .case-study-preview-image');
+      
+      // Filter out already processed images
+      const unprocessedImages = Array.from(allImages).filter(img => {
+        return !Array.from(processedImages).includes(img);
+      });
+      
+      // Only process unprocessed images
+      if (unprocessedImages.length > 0) {
+        pixelizer.init();
+      }
     });
   })();
