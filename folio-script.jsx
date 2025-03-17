@@ -36,7 +36,7 @@ function addStyles() {
     const style = document.createElement('style');
     style.textContent = `
         @media (min-width: 991px) {
-            .preview-container {
+            .rpg-container {
                 position: fixed;
                 width: 400px;
                 overflow: hidden;
@@ -47,7 +47,7 @@ function addStyles() {
                 background: white;
                 pointer-events: none;
             }
-            .preview-container img {
+            .rpg-container img {
                 width: 100%;
                 height: auto;
                 display: block;
@@ -136,7 +136,7 @@ function addStyles() {
 // Initialize preview system
 function initializePreviewSystem() {
     const previewContainer = document.createElement('div');
-    previewContainer.className = 'preview-container';
+    previewContainer.className = 'rpg-container';
     document.body.appendChild(previewContainer);
 
     const stackContainer = document.createElement('div');
