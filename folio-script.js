@@ -107,7 +107,7 @@ function initializeDitherPattern() {
         ];
         
         p.setup = function() {
-            let canvas = p.createCanvas(100, 100);
+            let canvas = p.createCanvas(40, 40);
             canvas.parent('bellissimo');
             initializeGrid();
             p.noSmooth();
