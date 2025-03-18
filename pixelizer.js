@@ -9,6 +9,7 @@
         this.duration = options.duration || 1000; // Duration in milliseconds
         this.fadeTime = options.fadeTime || 300; // Transition time in milliseconds
         this.selector = options.selector || '.featured-img, .case-study-preview-image'; // CSS selector for images
+        this.processedImages = new Set(); // Track processed images
       }
   
       init() {
@@ -17,6 +18,10 @@
         
         // Process each image
         images.forEach(img => {
+          // Skip if already processed
+          if (this.processedImages.has(img)) return;
+          this.processedImages.add(img);
+          
           // Create a wrapper for the image
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
@@ -30,7 +35,7 @@
           // Move image into wrapper
           wrapper.appendChild(img);
           
-          // Hide original image initially
+          // Force the image to be hidden initially
           img.style.opacity = '0';
           img.style.transition = `opacity ${this.fadeTime}ms ease-in-out`;
           
@@ -49,8 +54,8 @@
         const ctx = canvas.getContext('2d');
         
         // Set canvas dimensions
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
         
         // Position canvas absolutely over the image
         canvas.style.position = 'absolute';
@@ -62,18 +67,18 @@
         canvas.style.transition = `opacity ${this.fadeTime}ms ease-in-out`;
         
         // Draw pixelized version to canvas
-        ctx.drawImage(img, 0, 0, img.width, img.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
         // Calculate the number of pixels in the grid
-        const numBlocksX = Math.ceil(img.width / this.pixelSize);
-        const numBlocksY = Math.ceil(img.height / this.pixelSize);
+        const numBlocksX = Math.ceil(canvas.width / this.pixelSize);
+        const numBlocksY = Math.ceil(canvas.height / this.pixelSize);
         
         // Get the pixel data
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
         
         // Create a new image data for the pixelized version
-        const pixelizedData = ctx.createImageData(img.width, img.height);
+        const pixelizedData = ctx.createImageData(canvas.width, canvas.height);
         
         // For each block
         for (let y = 0; y < numBlocksY; y++) {
@@ -89,10 +94,10 @@
                 const posY = y * this.pixelSize + py;
                 
                 // Skip if outside image
-                if (posX >= img.width || posY >= img.height) continue;
+                if (posX >= canvas.width || posY >= canvas.height) continue;
                 
                 // Get pixel index
-                const i = (posY * img.width + posX) * 4;
+                const i = (posY * canvas.width + posX) * 4;
                 
                 // Sum up RGBA values
                 r += data[i];
@@ -116,10 +121,10 @@
                 const posY = y * this.pixelSize + py;
                 
                 // Skip if outside image
-                if (posX >= img.width || posY >= img.height) continue;
+                if (posX >= canvas.width || posY >= canvas.height) continue;
                 
                 // Get pixel index in new image data
-                const i = (posY * img.width + posX) * 4;
+                const i = (posY * canvas.width + posX) * 4;
                 
                 // Set color
                 pixelizedData.data[i] = r;
@@ -137,10 +142,7 @@
         // Add the canvas to the wrapper
         wrapper.appendChild(canvas);
         
-        // Always ensure the original image is hidden initially
-        img.style.opacity = '0';
-        
-        // Fade in the original image and fade out the pixelized canvas after the duration
+        // Ensure the pixelized version is shown for the full duration
         setTimeout(() => {
           img.style.opacity = '1';
           canvas.style.opacity = '0';
@@ -155,37 +157,31 @@
       }
     }
   
-    // Initialize the pixelizer when the DOM is loaded
+    // Create a single instance of the pixelizer
+    const pixelizer = new ImagePixelizer({
+      pixelSize: 40,      // Larger pixels
+      duration: 2000,     // Longer duration
+      fadeTime: 500       // Slower fade
+    });
+  
+    // Initialize on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', function() {
-      const pixelizer = new ImagePixelizer({
-        pixelSize: 40,      // Larger pixels
-        duration: 2000,     // Longer duration
-        fadeTime: 500       // Slower fade
-      });
       pixelizer.init();
     });
   
-    // Modify this part to avoid duplicate processing
+    // Also check on window load to catch any images loaded later
     window.addEventListener('load', function() {
-      // Only process new images that weren't handled during DOMContentLoaded
-      const pixelizer = new ImagePixelizer({
-        pixelSize: 40,
-        duration: 2000,
-        fadeTime: 500
-      });
-      
-      // Find all images that haven't been processed yet
-      const processedImages = document.querySelectorAll('.featured-img[style*="opacity"], .case-study-preview-image[style*="opacity"]');
-      const allImages = document.querySelectorAll('.featured-img, .case-study-preview-image');
-      
-      // Filter out already processed images
-      const unprocessedImages = Array.from(allImages).filter(img => {
-        return !Array.from(processedImages).includes(img);
-      });
-      
-      // Only process unprocessed images
-      if (unprocessedImages.length > 0) {
-        pixelizer.init();
-      }
+      pixelizer.init();
+    });
+  
+    // Add a mutation observer to handle dynamically added images
+    const observer = new MutationObserver(function() {
+      pixelizer.init();
+    });
+  
+    // Start observing the document with the configured parameters
+    observer.observe(document.body, { 
+      childList: true,
+      subtree: true 
     });
   })();
