@@ -45,20 +45,65 @@
           img.style.opacity = '0';
           img.style.transition = `opacity ${this.fadeTime}ms ease-in-out`;
           
-          // Create a placeholder pixelized effect immediately
-          this.createPlaceholderEffect(img, wrapper);
-          
-          // When image is loaded, try to create the real pixelized version
-          if (img.complete) {
-            this.pixelizeImage(img, wrapper);
-          } else {
-            img.onload = () => this.pixelizeImage(img, wrapper);
-          }
+          // Try to get the dominant color
+          this.getDominantColor(img, (color) => {
+            // Create a solid color placeholder
+            this.createColorPlaceholder(img, wrapper, color);
+            
+            // When image is loaded, try to create the real pixelized version
+            if (img.complete) {
+              this.pixelizeImage(img, wrapper);
+            } else {
+              img.onload = () => this.pixelizeImage(img, wrapper);
+            }
+          });
         });
       }
       
-      createPlaceholderEffect(img, wrapper) {
-        // Create a simple colored placeholder that looks pixelated
+      getDominantColor(img, callback) {
+        // Default color in case we can't detect
+        let color = this.fallbackColor;
+        
+        try {
+          // Create a tiny canvas to sample the image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set to 1x1 pixel to get average color
+          canvas.width = 1;
+          canvas.height = 1;
+          
+          // Try to draw the image to the tiny canvas
+          if (img.complete) {
+            ctx.drawImage(img, 0, 0, 1, 1);
+            const data = ctx.getImageData(0, 0, 1, 1).data;
+            color = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+          } else {
+            // If image isn't loaded yet, set up a one-time load handler
+            const tempHandler = () => {
+              try {
+                ctx.drawImage(img, 0, 0, 1, 1);
+                const data = ctx.getImageData(0, 0, 1, 1).data;
+                color = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+              } catch (e) {
+                console.log('Could not get image color:', e);
+              }
+              callback(color);
+              img.removeEventListener('load', tempHandler);
+            };
+            img.addEventListener('load', tempHandler);
+            return; // Exit early, callback will be called when image loads
+          }
+        } catch (e) {
+          console.log('Could not get image color:', e);
+        }
+        
+        // Call the callback with whatever color we determined
+        callback(color);
+      }
+      
+      createColorPlaceholder(img, wrapper, color) {
+        // Create a simple colored placeholder
         const placeholder = document.createElement('div');
         placeholder.className = 'pixelizer-placeholder';
         placeholder.style.position = 'absolute';
@@ -66,16 +111,8 @@
         placeholder.style.left = '0';
         placeholder.style.width = '100%';
         placeholder.style.height = '100%';
-        placeholder.style.backgroundColor = this.fallbackColor;
+        placeholder.style.backgroundColor = color;
         placeholder.style.transition = `opacity ${this.fadeTime}ms ease-in-out`;
-        
-        // Create a grid pattern with CSS
-        const gridSize = this.pixelSize + 'px';
-        placeholder.style.backgroundImage = `
-          linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-          linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
-        `;
-        placeholder.style.backgroundSize = gridSize + ' ' + gridSize;
         
         wrapper.appendChild(placeholder);
         
