@@ -34,6 +34,11 @@
     
     isMobile: function() {
       return window.innerWidth <= 479;
+    },
+    
+    // Debug helper
+    log: function(message) {
+      console.log(`[Consolidated] ${message}`);
     }
   };
   
@@ -45,7 +50,8 @@
       pixelSize: 40,
       duration: 2000,
       fadeTime: 500,
-      selector: '.featured-img, .case-study-preview-image',
+      // Expanded selector to match more image types
+      selector: '.featured-img, .case-study-preview-image, img[data-src], .w-dyn-items img, .collection-item img, .col-list-item img',
       fallbackColor: '#e0e0e0'
     },
     
@@ -54,6 +60,8 @@
     init: function(customOptions = {}) {
       if (initialized.pixelizer) return;
       initialized.pixelizer = true;
+      
+      Utils.log("Initializing Pixelizer System");
       
       // Merge custom options
       Object.assign(this.options, customOptions);
@@ -66,12 +74,14 @@
       
       // Handle images loaded later
       window.addEventListener('load', () => {
+        Utils.log("Window loaded - processing additional images");
         this.processImages();
       }, { once: true });
     },
     
     processImages: function() {
       const images = document.querySelectorAll(this.options.selector);
+      Utils.log(`Found ${images.length} images to process`);
       
       images.forEach(img => {
         if (this.processedImages.has(img)) return;
@@ -82,8 +92,11 @@
     },
     
     processImage: function(img) {
+      // Skip if image is already processed or doesn't have a src
+      if (!img.src && !img.dataset.src) return;
+      
       // Add crossorigin attribute for CORS
-      if (!img.hasAttribute('crossorigin') && img.src.startsWith('http')) {
+      if (!img.hasAttribute('crossorigin') && img.src && img.src.startsWith('http')) {
         img.setAttribute('crossorigin', 'anonymous');
       }
       
@@ -136,7 +149,7 @@
         }
       };
       
-      if (img.complete) {
+      if (img.complete && img.naturalWidth > 0) {
         tryGetColor();
       } else {
         img.addEventListener('load', tryGetColor, { once: true });
@@ -171,6 +184,7 @@
     setupMutationObserver: function() {
       const observer = new MutationObserver((mutations) => {
         if (mutations.some(mutation => mutation.addedNodes.length > 0)) {
+          Utils.log("DOM changed - processing new images");
           this.processImages();
         }
       });
@@ -196,6 +210,8 @@
     init: function() {
       if (initialized.preview) return;
       initialized.preview = true;
+      
+      Utils.log("Initializing Preview System");
       
       // Create containers
       this.previewContainer = document.createElement('div');
@@ -278,53 +294,74 @@
         }
       });
       
-      // Setup image hover and click events
-      document.querySelectorAll('.case-study-preview-image').forEach(img => {
-        // Use mouseenter/mouseleave instead of mouseover/mouseout to prevent bubbling issues
-        img.addEventListener('mouseenter', (e) => {
-          if (this.isTouch || !Utils.isDesktop()) return;
-          if (e.target === img) {
+      // Setup image hover and click events - use a more general selector
+      const setupPreviewForImages = () => {
+        const images = document.querySelectorAll('.case-study-preview-image, .col-list-item img, .collection-item img');
+        Utils.log(`Setting up preview for ${images.length} images`);
+        
+        images.forEach(img => {
+          // Skip if already processed
+          if (img.dataset.previewInitialized) return;
+          img.dataset.previewInitialized = 'true';
+          
+          img.addEventListener('mouseenter', (e) => {
+            if (this.isTouch || !Utils.isDesktop()) return;
             this.currentHoverElement = img;
             this.showPreview(img);
-          }
-        });
-        
-        img.addEventListener('mouseleave', (e) => {
-          if (this.isTouch || !Utils.isDesktop()) return;
-          if (e.target === img && !e.relatedTarget?.closest('.case-study-preview-image')) {
-            this.hidePreview();
-          }
-        });
-        
-        img.addEventListener('click', () => {
-          if (!Utils.isDesktop()) return;
+          });
           
-          if (this.stackItems.length === 0) {
-            this.previewContainer.style.display = 'none';
-          }
+          img.addEventListener('mouseleave', (e) => {
+            if (this.isTouch || !Utils.isDesktop()) return;
+            if (!e.relatedTarget?.closest('.case-study-preview-image, .col-list-item img, .collection-item img')) {
+              this.hidePreview();
+            }
+          });
           
-          const stackItem = document.createElement('div');
-          stackItem.className = 'preview-item';
-          const stackImg = new Image();
-          stackImg.src = img.src;
-          stackItem.appendChild(stackImg);
-          
-          this.stackItems.unshift(stackItem);
-          this.stackContainer.prepend(stackItem);
-          this.updateStackSizes();
-          
-          setTimeout(() => {
-            stackItem.classList.add('fading');
+          img.addEventListener('click', () => {
+            if (!Utils.isDesktop()) return;
+            
+            if (this.stackItems.length === 0) {
+              this.previewContainer.style.display = 'none';
+            }
+            
+            const stackItem = document.createElement('div');
+            stackItem.className = 'preview-item';
+            const stackImg = new Image();
+            stackImg.src = img.src;
+            stackItem.appendChild(stackImg);
+            
+            this.stackItems.unshift(stackItem);
+            this.stackContainer.prepend(stackItem);
+            this.updateStackSizes();
+            
             setTimeout(() => {
-              const index = this.stackItems.indexOf(stackItem);
-              if (index > -1) {
-                this.stackItems.splice(index, 1);
-                stackItem.remove();
-                this.updateStackSizes();
-              }
-            }, 300);
-          }, 3000);
+              stackItem.classList.add('fading');
+              setTimeout(() => {
+                const index = this.stackItems.indexOf(stackItem);
+                if (index > -1) {
+                  this.stackItems.splice(index, 1);
+                  stackItem.remove();
+                  this.updateStackSizes();
+                }
+              }, 300);
+            }, 3000);
+          });
         });
+      };
+      
+      // Initial setup
+      setupPreviewForImages();
+      
+      // Setup for dynamically added images
+      const observer = new MutationObserver((mutations) => {
+        if (mutations.some(mutation => mutation.addedNodes.length > 0)) {
+          setupPreviewForImages();
+        }
+      });
+      
+      observer.observe(document.body, { 
+        childList: true,
+        subtree: true 
       });
       
       // Handle mouse movement for preview - throttled to improve performance
@@ -335,7 +372,7 @@
         const now = Date.now();
         if (now - lastMouseMove > 100) {
           lastMouseMove = now;
-          const hoveredImg = e.target.closest('.case-study-preview-image');
+          const hoveredImg = e.target.closest('.case-study-preview-image, .col-list-item img, .collection-item img');
           if (hoveredImg && hoveredImg !== this.currentHoverElement) {
             this.currentHoverElement = hoveredImg;
             this.showPreview(hoveredImg, true);
@@ -741,12 +778,16 @@
    * Initialize all systems when the DOM is ready
    */
   function initSite() {
+    Utils.log("Initializing site");
+    
     // Initialize all systems
     PixelizerSystem.init();
     PreviewSystem.init();
-    DraggableSystem.init();
-    ColorEffectsSystem.init();
-    VectorPointsSystem.init();
+    
+    // Initialize other systems if needed
+    if (typeof DraggableSystem !== 'undefined') DraggableSystem.init();
+    if (typeof ColorEffectsSystem !== 'undefined') ColorEffectsSystem.init();
+    if (typeof VectorPointsSystem !== 'undefined') VectorPointsSystem.init();
     
     // Initialize jQuery shuffle if jQuery is available
     if (typeof jQuery !== 'undefined') {
@@ -758,6 +799,8 @@
    * Initialize jQuery shuffle functionality
    */
   function initJQueryShuffle() {
+    Utils.log("Initializing jQuery shuffle");
+    
     (function ($) {
       $.fn.shuffle = function () {
         var allElems = this.get(),
