@@ -1,10 +1,5 @@
-let previewSystemInitialized = false;
-
+<script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if preview system is already initialized
-    if (previewSystemInitialized) return;
-    previewSystemInitialized = true;
-    
     const style = document.createElement('style');
     style.textContent = `
         @media (min-width: 991px) {
@@ -103,36 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(hoverTimeout);
         hoverTimeout = setTimeout(() => {
             if (currentHoverElement === img && stackItems.length === 0) { 
-                // Clear the container first
-                previewContainer.innerHTML = '';
-                
-                // Reset any previous styling
-                previewContainer.style.height = 'auto';
-                previewContainer.style.padding = '0';
-                previewContainer.style.margin = '0';
-                previewContainer.style.overflow = 'hidden';
-                
-                // Create new image with a different source to avoid confusion
                 const previewImg = new Image();
-                
-                // Set up the image load handler to ensure proper sizing
-                previewImg.onload = () => {
-                    // Set image styles to ensure proper display
-                    previewImg.style.width = '100%';
-                    previewImg.style.height = 'auto';
-                    previewImg.style.display = 'block';
-                    
-                    // Make sure the preview container is positioned correctly
-                    previewContainer.style.position = 'fixed';
-                    previewContainer.style.bottom = '8px';
-                    previewContainer.style.left = '8px';
-                    previewContainer.style.zIndex = '9999';
-                };
-                
-                // Set the image source after setting up the handler
                 previewImg.src = img.src;
-                
-                // Add the image to the container
+                previewContainer.innerHTML = '';
                 previewContainer.appendChild(previewImg);
                 previewContainer.style.display = 'block';
             }
