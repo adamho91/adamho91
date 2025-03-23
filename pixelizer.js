@@ -326,14 +326,33 @@
       clearTimeout(this.hoverTimeout);
       this.hoverTimeout = setTimeout(() => {
         if (this.currentHoverElement === img && this.stackItems.length === 0) { 
-          const previewImg = new Image();
-          previewImg.src = img.src;
-          
-          // Clear the container
+          // Clear the container first
           this.previewContainer.innerHTML = '';
           
-          // Make sure the container height is auto to preserve aspect ratio
+          // Reset any previous styling
           this.previewContainer.style.height = 'auto';
+          this.previewContainer.style.padding = '0';
+          this.previewContainer.style.margin = '0';
+          
+          // Create new image
+          const previewImg = new Image();
+          
+          // Set up the image load handler to ensure proper sizing
+          previewImg.onload = () => {
+            // Calculate aspect ratio
+            const aspectRatio = previewImg.naturalHeight / previewImg.naturalWidth;
+            
+            // Set the container width (fixed at 400px from CSS)
+            const containerWidth = 400;
+            
+            // Set image styles to ensure proper display
+            previewImg.style.width = '100%';
+            previewImg.style.height = 'auto';
+            previewImg.style.display = 'block';
+          };
+          
+          // Set the image source after setting up the handler
+          previewImg.src = img.src;
           
           // Add the image to the container
           this.previewContainer.appendChild(previewImg);
