@@ -184,7 +184,6 @@
             left: 8px;
             background: white;
             pointer-events: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           }
           .preview-container img {
             width: 100%;
@@ -206,7 +205,6 @@
             opacity: 1;
             transition: opacity 0.3s ease;
             width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           }
           .preview-item img {
             width: 100%;
