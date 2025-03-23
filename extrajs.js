@@ -83,6 +83,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Pre-load images to get dimensions
+    const imageCache = new Map();
+    const preloadImage = (src) => {
+        if (imageCache.has(src)) {
+            return imageCache.get(src);
+        }
+        
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                imageCache.set(src, {
+                    width: img.naturalWidth,
+                    height: img.naturalHeight,
+                    aspectRatio: img.naturalHeight / img.naturalWidth
+                });
+                resolve(imageCache.get(src));
+            };
+            img.onerror = () => {
+                imageCache.set(src, { width: 400, height: 300, aspectRatio: 0.75 });
+                resolve(imageCache.get(src));
+            };
+            img.src = src;
+        });
+    };
+
     window.addEventListener('touchstart', function onFirstTouch() {
         isTouch = true;
         window.removeEventListener('touchstart', onFirstTouch);
@@ -96,33 +121,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const showPreview = (img, immediate = false) => {
+    const showPreview = async (img, immediate = false) => {
         if (!isDesktop()) return;
         clearTimeout(hoverTimeout);
+        
+        // Preload image to get dimensions
+        const imgData = await preloadImage(img.src);
+        
         hoverTimeout = setTimeout(() => {
             if (currentHoverElement === img && stackItems.length === 0) { 
                 // Clear existing content and prepare container
                 previewContainer.innerHTML = '';
+                
+                // Set container height based on aspect ratio before showing
+                previewContainer.style.height = `${400 * imgData.aspectRatio}px`;
                 previewContainer.style.display = 'block';
                 
                 // Create new image with proper aspect ratio handling
                 const previewImg = new Image();
                 
-                // Set up proper image loading
-                previewImg.onload = () => {
-                    // Calculate and maintain aspect ratio
-                    const aspectRatio = previewImg.naturalHeight / previewImg.naturalWidth;
-                    
-                    // Set container height based on aspect ratio
-                    previewContainer.style.height = `${400 * aspectRatio}px`;
-                    
-                    // Ensure image fills container properly
-                    previewImg.style.width = '100%';
-                    previewImg.style.height = '100%';
-                    previewImg.style.objectFit = 'contain';
-                };
+                // Set image styles immediately
+                previewImg.style.width = '100%';
+                previewImg.style.height = '100%';
+                previewImg.style.objectFit = 'contain';
                 
-                // Set source after setting up onload handler
+                // Set source
                 previewImg.src = img.src;
                 
                 // Add to container
@@ -142,7 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     };
 
+    // Preload all case study images on page load
     document.querySelectorAll('.case-study-preview-image').forEach(img => {
+        if (img.src) {
+            preloadImage(img.src);
+        }
+        
         img.addEventListener('mouseenter', (e) => {
             if (isTouch || !isDesktop()) return;
             if (e.target === img) {
@@ -158,20 +186,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        img.addEventListener('click', () => {
+        img.addEventListener('click', async () => {
             if (!isDesktop()) return;
 
             if (stackItems.length === 0) {
                 previewContainer.style.display = 'none';
             }
 
+            // Preload image to get dimensions
+            const imgData = await preloadImage(img.src);
+            
             const stackItem = document.createElement('div');
             stackItem.className = 'preview-item';
+            stackItem.style.height = `${400 * imgData.aspectRatio}px`;
             
             const stackImg = new Image();
+            stackImg.style.width = '100%';
+            stackImg.style.height = '100%';
+            stackImg.style.objectFit = 'contain';
             stackImg.src = img.src;
-            stackItem.appendChild(stackImg);
             
+            stackItem.appendChild(stackImg);
             stackContainer.appendChild(stackItem);
             stackItems.unshift(stackItem);
             
