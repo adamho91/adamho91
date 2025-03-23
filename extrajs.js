@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: 100%;
                 height: auto;
                 display: block;
+                object-fit: contain;
             }
             .preview-stack {
                 position: fixed;
@@ -34,12 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 opacity: 1;
                 transition: opacity 0.3s ease;
                 width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             }
             .preview-item img {
                 width: 100%;
                 height: auto;
                 display: block;
                 vertical-align: bottom;
+                object-fit: contain;
             }
             .preview-item.fading {
                 opacity: 0;
@@ -98,11 +101,32 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(hoverTimeout);
         hoverTimeout = setTimeout(() => {
             if (currentHoverElement === img && stackItems.length === 0) { 
-                const previewImg = new Image();
-                previewImg.src = img.src;
+                // Clear existing content and prepare container
                 previewContainer.innerHTML = '';
-                previewContainer.appendChild(previewImg);
                 previewContainer.style.display = 'block';
+                
+                // Create new image with proper aspect ratio handling
+                const previewImg = new Image();
+                
+                // Set up proper image loading
+                previewImg.onload = () => {
+                    // Calculate and maintain aspect ratio
+                    const aspectRatio = previewImg.naturalHeight / previewImg.naturalWidth;
+                    
+                    // Set container height based on aspect ratio
+                    previewContainer.style.height = `${400 * aspectRatio}px`;
+                    
+                    // Ensure image fills container properly
+                    previewImg.style.width = '100%';
+                    previewImg.style.height = '100%';
+                    previewImg.style.objectFit = 'contain';
+                };
+                
+                // Set source after setting up onload handler
+                previewImg.src = img.src;
+                
+                // Add to container
+                previewContainer.appendChild(previewImg);
             }
         }, immediate ? 0 : 50);
     };
@@ -143,12 +167,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const stackItem = document.createElement('div');
             stackItem.className = 'preview-item';
+            
             const stackImg = new Image();
             stackImg.src = img.src;
             stackItem.appendChild(stackImg);
             
+            stackContainer.appendChild(stackItem);
             stackItems.unshift(stackItem);
-            stackContainer.prepend(stackItem);
+            
             updateStackSizes();
 
             setTimeout(() => {
