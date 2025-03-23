@@ -222,9 +222,6 @@
       // Add styles
       this.addStyles();
       
-      // Setup event listeners
-      this.setupEventListeners();
-      
       // Detect touch devices
       window.addEventListener('touchstart', () => {
         this.isTouch = true;
@@ -238,6 +235,9 @@
           this.previewContainer.style.display = 'none';
         }
       });
+      
+      // Setup event listeners
+      this.setupEventListeners();
     },
     
     addStyles: function() {
@@ -452,6 +452,28 @@
   };
   
   /**
+   * Bellissimo Script - Added to ensure it works
+   */
+  const BellissimoSystem = {
+    init: function() {
+      Utils.log("Initializing Bellissimo System");
+      
+      // Add your Bellissimo-specific code here
+      // This is a placeholder for any special functionality needed
+      
+      // Example: Set up event listeners for Bellissimo elements
+      document.querySelectorAll('.bellissimo-element').forEach(el => {
+        el.addEventListener('click', this.handleBellissimoClick);
+      });
+    },
+    
+    handleBellissimoClick: function(e) {
+      // Handle Bellissimo click events
+      console.log('Bellissimo element clicked:', e.target);
+    }
+  };
+  
+  /**
    * Initialize all systems when the DOM is ready
    */
   function initSite() {
@@ -460,6 +482,9 @@
     // Initialize pixelizer and preview systems
     PixelizerSystem.init();
     PreviewSystem.init();
+    
+    // Initialize Bellissimo system
+    BellissimoSystem.init();
     
     // Initialize jQuery shuffle if jQuery is available
     if (typeof jQuery !== 'undefined') {
@@ -515,4 +540,9 @@
     // DOM already loaded, run immediately
     initSite();
   }
+  
+  // Expose key functions to global scope for external scripts
+  window.pixelizerSystem = PixelizerSystem;
+  window.previewSystem = PreviewSystem;
+  window.bellissimoSystem = BellissimoSystem;
 })(); 
