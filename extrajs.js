@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewContainer.style.margin = '0';
                 previewContainer.style.overflow = 'hidden';
                 
-                // Create new image
+                // Create new image with a different source to avoid confusion
                 const previewImg = new Image();
                 
                 // Set up the image load handler to ensure proper sizing
@@ -116,7 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     previewImg.style.width = '100%';
                     previewImg.style.height = 'auto';
                     previewImg.style.display = 'block';
-                    previewImg.style.objectFit = 'contain';
+                    
+                    // Make sure the preview container is positioned correctly
+                    previewContainer.style.position = 'fixed';
+                    previewContainer.style.bottom = '8px';
+                    previewContainer.style.left = '8px';
+                    previewContainer.style.zIndex = '9999';
                 };
                 
                 // Set the image source after setting up the handler
