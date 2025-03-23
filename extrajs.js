@@ -3,25 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const style = document.createElement('style');
     style.textContent = `
         @media (min-width: 991px) {
-            .preview-container {
-                position: fixed;
-                width: 400px;
-                overflow: hidden;
-                display: none;
-                z-index: 9999;
-                bottom: 8px;
-                left: 8px;
-                background: white;
-                pointer-events: none;
-                max-height: 80vh; /* Limit height for very tall images */
-            }
-            .preview-container img {
-                width: 100%;
-                height: auto;
-                display: block;
-                object-fit: contain;
-                max-height: 80vh; /* Ensure image doesn't exceed viewport height */
-            }
             .preview-stack {
                 position: fixed;
                 bottom: 8px;
@@ -55,17 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.head.appendChild(style);
 
-    const previewContainer = document.createElement('div');
-    previewContainer.className = 'preview-container';
-    document.body.appendChild(previewContainer);
-
     const stackContainer = document.createElement('div');
     stackContainer.className = 'preview-stack';
     document.body.appendChild(stackContainer);
 
     let stackItems = [];
-    let hoverTimeout;
-    let currentHoverElement = null;
     let isTouch = false;
 
     const isDesktop = () => window.innerWidth >= 991;
@@ -123,88 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isDesktop()) {
             stackItems.forEach(item => item.remove());
             stackItems = [];
-            previewContainer.style.display = 'none';
         }
     });
-
-    const showPreview = async (img, immediate = false) => {
-        if (!isDesktop()) return;
-        clearTimeout(hoverTimeout);
-        
-        try {
-            // Preload image to get dimensions
-            const imgData = await preloadImage(img.src);
-            
-            hoverTimeout = setTimeout(() => {
-                if (currentHoverElement === img && stackItems.length === 0) { 
-                    // Clear existing content
-                    previewContainer.innerHTML = '';
-                    
-                    // Create new image
-                    const previewImg = new Image();
-                    
-                    // Set image styles
-                    previewImg.style.width = '100%';
-                    previewImg.style.height = 'auto';
-                    previewImg.style.display = 'block';
-                    
-                    // Add to container first (important for proper sizing)
-                    previewContainer.appendChild(previewImg);
-                    
-                    // Set container height based on aspect ratio
-                    const containerHeight = 400 * imgData.aspectRatio;
-                    previewContainer.style.height = 'auto'; // Reset height first
-                    
-                    // Set source after adding to DOM
-                    previewImg.src = img.src;
-                    
-                    // Show the container
-                    previewContainer.style.display = 'block';
-                }
-            }, immediate ? 0 : 50);
-        } catch (error) {
-            console.error("Error showing preview:", error);
-        }
-    };
-
-    const hidePreview = () => {
-        if (!isDesktop()) return;
-        clearTimeout(hoverTimeout);
-        hoverTimeout = setTimeout(() => {
-            currentHoverElement = null;
-            if (stackItems.length === 0) { 
-                previewContainer.style.display = 'none';
-            }
-        }, 50);
-    };
 
     // Preload all case study images on page load
     document.querySelectorAll('.case-study-preview-image').forEach(img => {
         if (img.src) {
             preloadImage(img.src);
         }
-        
-        img.addEventListener('mouseenter', (e) => {
-            if (isTouch || !isDesktop()) return;
-            if (e.target === img) {
-                currentHoverElement = img;
-                showPreview(img);
-            }
-        });
-        
-        img.addEventListener('mouseleave', (e) => {
-            if (isTouch || !isDesktop()) return;
-            if (e.target === img && !e.relatedTarget?.closest('.case-study-preview-image')) {
-                hidePreview();
-            }
-        });
 
         img.addEventListener('click', async () => {
             if (!isDesktop()) return;
-
-            if (stackItems.length === 0) {
-                previewContainer.style.display = 'none';
-            }
 
             try {
                 // Preload image to get dimensions
@@ -239,21 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error creating stack item:", error);
             }
         });
-    });
-
-    let lastMouseMove = 0;
-    document.addEventListener('mousemove', (e) => {
-        if (isTouch || !isDesktop()) return;
-        
-        const now = Date.now();
-        if (now - lastMouseMove > 100) {
-            lastMouseMove = now;
-            const hoveredImg = e.target.closest('.case-study-preview-image');
-            if (hoveredImg && hoveredImg !== currentHoverElement) {
-                currentHoverElement = hoveredImg;
-                showPreview(hoveredImg, true);
-            }
-        }
     });
 });
 
@@ -331,9 +220,9 @@ function rhythmicFadeOut() {
         
         const randomIndex = Math.floor(Math.random() * visibleElements.length);
         const element = visibleElements[randomIndex];
-        
         element.classList.remove('fade-in');
         element.classList.add('fade-out');
+        
         visibleElements.splice(randomIndex, 1);
         
         if (visibleElements.length > 0) {
@@ -351,9 +240,10 @@ function animateElements() {
     if (elements.length === 0 || !isAnimating) return;
     
     const rhythms = [
-        [100, 200, 50, 300, 150, 250],
-        [300, 300, 300, 100, 100, 100],
-        [200, 50, 200, 50, 200, 50]
+        [50, 100, 25, 150, 75, 125],
+        [150, 150, 150, 50, 50, 50],
+        [100, 25, 100, 25, 100, 25],
+        [200, 50, 50, 200, 50, 50]
     ];
     
     const currentRhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
@@ -364,8 +254,9 @@ function animateElements() {
         
         const randomIndex = Math.floor(Math.random() * elements.length);
         const element = elements[randomIndex];
-        
         element.classList.add('fade-in');
+        element.classList.remove('fade-out');
+        
         elements.splice(randomIndex, 1);
         
         if (elements.length > 0 && isAnimating) {
