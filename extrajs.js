@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewContainer.style.height = 'auto';
                 previewContainer.style.padding = '0';
                 previewContainer.style.margin = '0';
+                previewContainer.style.overflow = 'hidden';
                 
                 // Create new image
                 const previewImg = new Image();
@@ -115,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     previewImg.style.width = '100%';
                     previewImg.style.height = 'auto';
                     previewImg.style.display = 'block';
+                    previewImg.style.objectFit = 'contain';
                 };
                 
                 // Set the image source after setting up the handler
