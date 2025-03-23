@@ -1,5 +1,10 @@
-<script>
+let previewSystemInitialized = false;
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Check if preview system is already initialized
+    if (previewSystemInitialized) return;
+    previewSystemInitialized = true;
+    
     const style = document.createElement('style');
     style.textContent = `
         @media (min-width: 991px) {
