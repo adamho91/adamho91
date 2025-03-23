@@ -224,6 +224,20 @@
       
       // Setup event listeners
       this.setupEventListeners();
+      
+      // Detect touch devices
+      window.addEventListener('touchstart', () => {
+        this.isTouch = true;
+      }, { once: true });
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        if (!Utils.isDesktop()) {
+          this.stackItems.forEach(item => item.remove());
+          this.stackItems = [];
+          this.previewContainer.style.display = 'none';
+        }
+      });
     },
     
     addStyles: function() {
@@ -277,20 +291,6 @@
     },
     
     setupEventListeners: function() {
-      // Detect touch devices
-      window.addEventListener('touchstart', () => {
-        this.isTouch = true;
-      }, { once: true });
-      
-      // Handle window resize
-      window.addEventListener('resize', () => {
-        if (!Utils.isDesktop()) {
-          this.stackItems.forEach(item => item.remove());
-          this.stackItems = [];
-          this.previewContainer.style.display = 'none';
-        }
-      });
-      
       // Setup image hover and click events - use a more general selector
       const setupPreviewForImages = () => {
         const images = document.querySelectorAll('.case-study-preview-image, .col-list-item img, .collection-item img');
@@ -414,6 +414,9 @@
           
           // Set up the image load handler to ensure proper sizing
           previewImg.onload = () => {
+            // Calculate aspect ratio
+            const aspectRatio = previewImg.naturalHeight / previewImg.naturalWidth;
+            
             // Set image styles to ensure proper display
             previewImg.style.width = '100%';
             previewImg.style.height = 'auto';
