@@ -1,17 +1,4 @@
 // Main script file for folio functionality
-// Styles for the elements (only click indicator, no bellissimo styling)
-const styles = `
-    .click-indicator {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.5);
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-        z-index: 9998;
-        animation: click-ripple 0.8s ease-out forwards;
-    }
     
     @keyframes click-ripple {
         0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
