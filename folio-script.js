@@ -3,8 +3,8 @@
 const styles = `
     .click-indicator {
         position: absolute;
-        width: 20px;
-        height: 20px;
+        width: 0px;
+        height: 0px;
         border-radius: 50%;
         background: rgba(255, 255, 255, 0.5);
         transform: translate(-50%, -50%);
