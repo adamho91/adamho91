@@ -1,7 +1,22 @@
 // Main script file for folio functionality
-// Styles for the elements (click indicator removed)
+// Styles for the elements (only click indicator, no bellissimo styling)
 const styles = `
-    /* Click indicator styles removed as requested */
+    .click-indicator {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 9998;
+        animation: click-ripple 0.8s ease-out forwards;
+    }
+    
+    @keyframes click-ripple {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+        100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+    }
 `;
 
 // Initialize everything when the document is ready
@@ -14,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load external libraries
     loadExternalLibraries();
     
-    // Initialize click tracking (now just logs, no visual indicator)
+    // Initialize click tracking
     initializeClickTracking();
     
     // Initialize dither pattern once p5.js is loaded
@@ -52,13 +67,22 @@ function checkP5AndInitialize() {
     }
 }
 
-// Initialize click tracking (without visual indicators)
+// Initialize click tracking
 function initializeClickTracking() {
     document.addEventListener('click', (e) => {
-        // REMOVED: Click indicator creation
-        // REMOVED: Animation timeout
+        // Create click indicator
+        const clickIndicator = document.createElement('div');
+        clickIndicator.className = 'click-indicator';
+        clickIndicator.style.left = `${e.clientX}px`;
+        clickIndicator.style.top = `${e.clientY}px`;
+        document.body.appendChild(clickIndicator);
         
-        // Still log click position for debugging
+        // Remove after animation completes
+        setTimeout(() => {
+            clickIndicator.remove();
+        }, 800);
+        
+        // Log click position
         console.log(`Click at: X=${e.clientX}, Y=${e.clientY}`);
     });
 }
@@ -84,9 +108,6 @@ function initializeDitherPattern() {
             '#dbff00', '#fdceeb', '#0095ff', '#cde0f5', '#fdceeb', '#e362d3'
         ];
         
-        // Flag to prevent duplicate event listeners
-        let clickListenersAttached = false;
-        
         p.setup = function() {
             let canvas = p.createCanvas(40, 40);
             canvas.parent('bellissimo');
@@ -94,45 +115,31 @@ function initializeDitherPattern() {
             p.noSmooth();
             p.frameRate(4);
             
-            // Only attach listeners once
-            if (!clickListenersAttached) {
-                // General click event for pulse effect
-                document.addEventListener('click', () => {
-                    pulseIntensity = 1;
-                    patternIntensity = 1;
-                });
-                
-                // Special click events for featured images and case study previews
-                document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('featured-img') || 
-                        e.target.classList.contains('case-study-preview-image') ||
-                        e.target.closest('.featured-img') || 
-                        e.target.closest('.case-study-preview-image')) {
-                        
-                        // Get a random color from the classColors array
-                        flashColor = classColors[Math.floor(Math.random() * classColors.length)];
-                        flashDuration = 3; // Flash for 3 frames
-                        
-                        // Also set as the target color for a lasting effect
-                        targetColor = flashColor;
-                    }
-                });
-                
-                // Add scroll listener
-                window.addEventListener('scroll', () => {
-                    isScrolling = true;
-                    clearTimeout(window.scrollTimeout);
-                    window.scrollTimeout = setTimeout(() => {
-                        isScrolling = false;
-                    }, 150);
-                });
-                
-                clickListenersAttached = true;
-            }
+            // General click event for pulse effect
+            document.addEventListener('click', () => {
+                pulseIntensity = 1;
+                patternIntensity = 1;
+            });
+            
+            // Special click events for featured images and case study previews
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('featured-img') || 
+                    e.target.classList.contains('case-study-preview-image') ||
+                    e.target.closest('.featured-img') || 
+                    e.target.closest('.case-study-preview-image')) {
+                    
+                    // Get a random color from the classColors array
+                    flashColor = classColors[Math.floor(p.random(classColors.length))];
+                    flashDuration = 3; // Flash for 3 frames
+                    
+                    // Also set as the target color for a lasting effect
+                    targetColor = flashColor;
+                }
+            });
         };
         
         function getRandomClassColor() {
-            return classColors[Math.floor(Math.random() * classColors.length)];
+            return classColors[Math.floor(p.random(classColors.length))];
         }
         
         function getCornerBias(i, j) {
@@ -181,7 +188,7 @@ function initializeDitherPattern() {
             if (noiseVal < intensityThreshold) {
                 let threshold = 0.5 - (cornerBiasStrength * (1 - cornerEffect) * 0.5);
                 threshold = p.map(mouseXNorm, 0, 1, 0.3, 0.7) * threshold;
-                value += Math.random() > threshold ? 1 : 0;
+                value += p.random() > threshold ? 1 : 0;
             }
             
             if (isScrolling) {
@@ -190,7 +197,7 @@ function initializeDitherPattern() {
             
             return {
                 intensity: value,
-                sparkle: Math.random() < 0.02 // 2% chance for sparkle
+                sparkle: p.random() < 0.02 // 2% chance for sparkle
             };
         }
         
