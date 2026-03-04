@@ -723,4 +723,275 @@ window.xpSystem.init();
     // Initialize on DOMContentLoaded (once)
     document.addEventListener('DOMContentLoaded', () => pixelizer.init(), { once: true });
 })();
+
+// Enemy System Script
+// Spawns a monster every 2-5 minutes randomly.
+// Clicking the enemy-system container gives 20% of current XP bar progress.
+// enemy-picture reacts with a p5.js dither animation (enemy variant).
+
+(function () {
+  // ─── Enemy p5 Dither Animation ───────────────────────────────────────────────
+  // Waits for p5.js to be available, then starts a hostile-looking dither sketch
+  // inside the element with class "enemy-picture".
+
+  function initEnemyDither(container) {
+    if (!window.p5) {
+      setTimeout(() => initEnemyDither(container), 100);
+      return;
+    }
+
+    // Prevent double-init
+    if (container._enemyP5) return;
+
+    // Enemy class colours – reds, oranges, sickly greens
+    const enemyColors = [
+      '#ff2200', '#ff6600', '#cc0000', '#ff9900',
+      '#33ff00', '#ff0066', '#ffcc00', '#990000',
+    ];
+
+    container._enemyP5 = new window.p5(function (p) {
+      const SIZE = 20; // grid cells
+      let grid = [];
+      let frameCounter = 0;
+      let pulseIntensity = 0;
+      let currentColor = enemyColors[0];
+      let targetColor  = enemyColors[0];
+      let alive = true; // set false on defeat
+
+      // Pick a random enemy color
+      function randomEnemyColor() {
+        return enemyColors[Math.floor(Math.random() * enemyColors.length)];
+      }
+
+      p.setup = function () {
+        const canvas = p.createCanvas(container.offsetWidth || 80, container.offsetHeight || 80);
+        canvas.parent(container);
+        p.noSmooth();
+        p.frameRate(6); // Slightly faster than bellissimo – feels more hostile
+        targetColor = randomEnemyColor();
+      };
+
+      // Called externally when the enemy takes a hit / is defeated
+      container.enemyHit = function () {
+        pulseIntensity = 1.5;
+        targetColor = '#ff0000';
+      };
+
+      container.enemyDefeat = function () {
+        alive = false;
+        targetColor = '#000000';
+      };
+
+      function buildGrid() {
+        grid = [];
+        for (let i = 0; i < SIZE; i++) {
+          grid[i] = [];
+          for (let j = 0; j < SIZE; j++) {
+            // Dither: noisy, chunky, corner-biased differently from bellissimo
+            let t = frameCounter * 0.15;
+
+            // Use a diagonal noise sweep (different from bellissimo's symmetric corners)
+            let noiseVal = p.noise(i * 0.15 + t, j * 0.12 - t * 0.7) * 100;
+
+            // Bias toward centre (inverse of bellissimo's corner bias)
+            let cx = (i - SIZE / 2) / SIZE;
+            let cy = (j - SIZE / 2) / SIZE;
+            let centreDist = Math.sqrt(cx * cx + cy * cy); // 0 at center, ~0.7 at corner
+            let threshold = p.map(pulseIntensity, 0, 1.5, 30, 70) * (0.4 + centreDist * 0.6);
+
+            let intensity = noiseVal < threshold ? 1 : 0;
+            let sparkle   = Math.random() < 0.04; // slightly more sparkle than bellissimo
+
+            grid[i][j] = { intensity, sparkle };
+          }
+        }
+      }
+
+      p.draw = function () {
+        p.background('#0d0d0d');
+
+        if (!alive) {
+          // Draw a dissolving static effect on defeat
+          p.background('#0d0d0d');
+          for (let i = 0; i < SIZE; i++) {
+            for (let j = 0; j < SIZE; j++) {
+              if (Math.random() < 0.05) {
+                p.fill(Math.random() * 80);
+                p.noStroke();
+                let cs = p.width / SIZE;
+                p.rect(i * cs, j * cs, cs + 1, cs + 1);
+              }
+            }
+          }
+          return;
+        }
+
+        // Lerp current colour toward target
+        let from = p.color(currentColor);
+        let to   = p.color(targetColor);
+        let lerped = p.lerpColor(from, to, 0.08);
+        currentColor = lerped.toString();
+
+        // Cycle colours slowly
+        if (frameCounter % 18 === 0) {
+          targetColor = randomEnemyColor();
+        }
+
+        frameCounter++;
+        pulseIntensity *= 0.85;
+        buildGrid();
+
+        let cellSize = p.width / SIZE;
+
+        for (let i = 0; i < SIZE; i++) {
+          for (let j = 0; j < SIZE; j++) {
+            let { intensity, sparkle } = grid[i][j];
+            let base  = p.color('#0d0d0d');
+            let pixel = sparkle && intensity > 0
+              ? p.color(randomEnemyColor())
+              : p.color(currentColor);
+
+            p.fill(p.lerpColor(base, pixel, intensity));
+            p.noStroke();
+            p.rect(i * cellSize, j * cellSize, cellSize + 1, cellSize + 1);
+          }
+        }
+      };
+    });
+  }
+
+  // ─── Enemy Spawn Logic ───────────────────────────────────────────────────────
+
+  const ENEMY_NAMES = [
+    'Glitch Rat', 'Pixel Wraith', 'Noise Fiend', 'Error Sprite',
+    'Data Leech', 'Void Crawler', 'Bit Phantom', 'Null Shade',
+  ];
+
+  function randomEnemyName() {
+    return ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+  }
+
+  // Returns a random spawn delay between 2 and 5 minutes (ms)
+  function randomDelay() {
+    return (2 + Math.random() * 3) * 60 * 1000;
+  }
+
+  // Show the enemy container, wire up click, and start the dither
+  function spawnEnemy() {
+    const system = document.querySelector('.enemy-system');
+    if (!system) return;
+
+    // Update enemy name text if the element exists
+    const nameEl = system.querySelector('.enemyname');
+    if (nameEl) nameEl.textContent = randomEnemyName();
+
+    // Show the container
+    system.style.display = '';
+    system.style.opacity = '0';
+    system.style.transition = 'opacity 0.6s ease';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { system.style.opacity = '1'; });
+    });
+
+    // Init the dither on enemy-picture
+    const picEl = system.querySelector('.enemy-picture');
+    if (picEl) initEnemyDither(picEl);
+
+    // Wire up the click reward (once per spawn)
+    function onEnemyClick() {
+      // Give 20% of current XP bar
+      const xp = window.xpSystem;
+      if (xp && xp.player) {
+        const reward = Math.ceil(xp.player.xpNeeded * 0.20);
+        // Trigger hit animation on the dither
+        if (picEl && picEl.enemyHit) picEl.enemyHit();
+
+        // Defeat: give XP, hide after short delay
+        if (picEl && picEl.enemyDefeat) picEl.enemyDefeat();
+
+        setTimeout(() => {
+          xp.addXP(reward);
+          // Show floating reward text
+          showRewardText(system, `+${reward} XP`);
+        }, 300);
+
+        // Hide the enemy after defeat animation
+        setTimeout(() => {
+          system.style.transition = 'opacity 0.8s ease';
+          system.style.opacity = '0';
+          setTimeout(() => {
+            system.style.display = 'none';
+            // Destroy the p5 sketch so it can be re-created fresh next spawn
+            if (picEl && picEl._enemyP5) {
+              picEl._enemyP5.remove();
+              delete picEl._enemyP5;
+              picEl.innerHTML = '';
+            }
+            scheduleNextSpawn();
+          }, 800);
+        }, 600);
+      }
+
+      system.removeEventListener('click', onEnemyClick);
+    }
+
+    system.addEventListener('click', onEnemyClick);
+  }
+
+  function scheduleNextSpawn() {
+    setTimeout(spawnEnemy, randomDelay());
+  }
+
+  // ─── Floating reward text ────────────────────────────────────────────────────
+  function showRewardText(anchor, text) {
+    const el = document.createElement('div');
+    el.textContent = text;
+    el.style.cssText = `
+      position: fixed;
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff2200;
+      pointer-events: none;
+      z-index: 99999;
+      text-shadow: 0 0 8px #ff6600;
+      transition: transform 0.8s ease, opacity 0.8s ease;
+      opacity: 1;
+    `;
+    // Place near the anchor element
+    const rect = anchor.getBoundingClientRect();
+    el.style.left = `${rect.left + rect.width / 2 - 40}px`;
+    el.style.top  = `${rect.top + rect.height / 2}px`;
+    document.body.appendChild(el);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.transform = 'translateY(-60px)';
+        el.style.opacity   = '0';
+      });
+    });
+
+    setTimeout(() => el.remove(), 900);
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────────
+  function boot() {
+    // Hide the enemy system initially
+    const system = document.querySelector('.enemy-system');
+    if (system) {
+      system.style.display = 'none';
+      system.style.cursor  = 'pointer';
+    }
+
+    // Schedule the first spawn
+    scheduleNextSpawn();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+
 </script>
