@@ -724,6 +724,8 @@ window.xpSystem.init();
     document.addEventListener('DOMContentLoaded', () => pixelizer.init(), { once: true });
 })();
 
+
+
 // Enemy System Script
 // Spawns a monster every 2-5 minutes randomly.
 // Clicking the enemy-system container gives 20% of current XP bar progress.
