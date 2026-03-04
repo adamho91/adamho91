@@ -546,3 +546,285 @@
   window.previewSystem = PreviewSystem;
   window.bellissimoSystem = BellissimoSystem;
 })(); 
+
+// ─── ENEMY SPAWN SYSTEM ──────────────────────────────────────────────────────
+// Appears bottom-left alongside the preview-stack.
+// First spawn: 10s. Subsequent: random 2–5 min.
+// Click to defeat → +20% of current XP bar → dissolves → respawns later.
+// Pure p5.js dither, self-contained, no extra HTML needed.
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function () {
+
+  // ── Config ─────────────────────────────────────────────────────────────────
+  const FIRST_SPAWN_MS = 10 * 1000;
+  const MIN_RESPAWN_MS = 2 * 60 * 1000;
+  const MAX_RESPAWN_MS = 5 * 60 * 1000;
+
+  const ENEMY_NAMES = [
+    'Glitch Rat',  'Pixel Wraith', 'Noise Fiend',  'Error Sprite',
+    'Data Leech',  'Void Crawler', 'Bit Phantom',  'Null Shade',
+    'Cache Demon', 'Stack Ghoul',  'Loop Specter', 'Hex Lurker',
+  ];
+
+  // Reds, oranges, sickly greens — distinct from bellissimo's cooler palette
+  const ENEMY_COLORS = [
+    '#ff2200', '#ff6600', '#cc0000', '#ff9900',
+    '#aaff00', '#ff0055', '#ffcc00', '#bb0000',
+  ];
+
+  function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+  function randDelay() { return MIN_RESPAWN_MS + Math.random() * (MAX_RESPAWN_MS - MIN_RESPAWN_MS); }
+
+  // ── CSS ────────────────────────────────────────────────────────────────────
+  // Sits in bottom-left, above the preview-stack (z-index 10000 vs 9999)
+  // Uses the same font/feel as the rest of the folio
+  document.head.insertAdjacentHTML('beforeend', `<style>
+    #esys {
+      position: fixed;
+      bottom: 8px;
+      left: 8px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    #esys.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+    #esys.hide {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    #esys-wrap {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      cursor: crosshair;
+      image-rendering: pixelated;
+    }
+    /* Force p5 canvas to stay inside wrapper — fixes the top-left bleed bug */
+    #esys-wrap canvas {
+      position: absolute !important;
+      top: 0     !important;
+      left: 0    !important;
+      width: 100%  !important;
+      height: 100% !important;
+    }
+    #esys-meta {
+      font-family: monospace;
+      font-size: 9px;
+      line-height: 1.4;
+      user-select: none;
+      cursor: crosshair;
+    }
+    #esys-name {
+      color: #ff6633;
+      text-shadow: 0 0 6px #ff2200;
+      display: block;
+    }
+    #esys-prompt {
+      color: #ff220088;
+      display: block;
+    }
+    /* Floating XP pop */
+    .esys-pop {
+      position: fixed;
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: bold;
+      color: #ff3300;
+      text-shadow: 0 0 8px #ff6600;
+      pointer-events: none;
+      z-index: 99999;
+      opacity: 1;
+      transition: transform 1s ease, opacity 1s ease;
+    }
+  </style>`);
+
+  // ── DOM ────────────────────────────────────────────────────────────────────
+  const esys   = document.createElement('div');  esys.id = 'esys';
+  const wrap   = document.createElement('div');  wrap.id = 'esys-wrap';
+  const meta   = document.createElement('div');  meta.id = 'esys-meta';
+  meta.innerHTML = `<span id="esys-name"></span><span id="esys-prompt">[ click to defeat ]</span>`;
+  esys.appendChild(wrap);
+  esys.appendChild(meta);
+  document.body.appendChild(esys);
+
+  const nameEl = meta.querySelector('#esys-name');
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let sketch      = null;
+  let alive       = false;
+  let dissolving  = false;
+  let fc          = 0;        // frame counter shared into sketch closure
+  let hitPulse    = 0;
+  let curColor    = ENEMY_COLORS[0];
+  let tgtColor    = ENEMY_COLORS[0];
+
+  // ── p5 sketch ─────────────────────────────────────────────────────────────
+  function launchSketch() {
+    if (!window.p5) { setTimeout(launchSketch, 80); return; }
+    if (sketch) { sketch.remove(); sketch = null; wrap.innerHTML = ''; }
+
+    dissolving = false;
+    alive      = true;
+    hitPulse   = 0;
+    fc         = 0;
+    curColor   = rand(ENEMY_COLORS);
+    tgtColor   = rand(ENEMY_COLORS);
+
+    sketch = new window.p5(s => {
+      const G = 16; // grid size — chunkier than bellissimo's 25
+
+      // Build dither grid each frame
+      function makeGrid() {
+        const t = fc * 0.18;
+        const out = [];
+        for (let i = 0; i < G; i++) {
+          out[i] = [];
+          for (let j = 0; j < G; j++) {
+            if (dissolving) {
+              // Scatter static — random sparse dots, fades out fast
+              out[i][j] = { v: Math.random() < (0.12 - fc * 0.003) ? 1 : 0, sp: false };
+              continue;
+            }
+            // Diagonal sweep noise (vs bellissimo's symmetric noise)
+            const n = s.noise(i * 0.2 + t, j * 0.15 - t * 0.55) * 100;
+            // Centre-pull bias (inverse of bellissimo's corner bias)
+            const cx = (i - G / 2) / G, cy = (j - G / 2) / G;
+            const d  = Math.sqrt(cx*cx + cy*cy); // 0 at centre, ~0.7 at corner
+            const th = s.map(hitPulse, 0, 2, 30, 75) * (0.3 + d * 0.7);
+            out[i][j] = { v: n < th ? 1 : 0, sp: Math.random() < 0.05 };
+          }
+        }
+        return out;
+      }
+
+      s.setup = function () {
+        const c = s.createCanvas(80, 80);
+        c.parent(wrap);
+        // Keep canvas anchored inside wrapper — prevents top-left bleed
+        c.style('position', 'absolute');
+        c.style('top',  '0');
+        c.style('left', '0');
+        c.style('width',  '100%');
+        c.style('height', '100%');
+        s.noSmooth();
+        s.frameRate(8); // faster than bellissimo (4fps) — feels more threatening
+      };
+
+      s.draw = function () {
+        s.background('#0d0d0d');
+
+        // Colour lerp
+        curColor = s.lerpColor(s.color(curColor), s.color(tgtColor), 0.08).toString();
+        if (fc % 12 === 0 && !dissolving) tgtColor = rand(ENEMY_COLORS);
+
+        fc++;
+        hitPulse *= 0.78;
+
+        const grid = makeGrid();
+        const cs   = s.width / G;
+
+        for (let i = 0; i < G; i++) {
+          for (let j = 0; j < G; j++) {
+            const { v, sp } = grid[i][j];
+            const base  = s.color('#0d0d0d');
+            const pixel = sp ? s.color(rand(ENEMY_COLORS)) : s.color(curColor);
+            s.fill(s.lerpColor(base, pixel, v));
+            s.noStroke();
+            s.rect(i * cs, j * cs, cs + 1, cs + 1);
+          }
+        }
+
+        // Stop sketch once dissolve frames are exhausted
+        if (dissolving && fc > 30) s.noLoop();
+      };
+    });
+  }
+
+  // ── XP pop ────────────────────────────────────────────────────────────────
+  function showPop(amount) {
+    const el = document.createElement('div');
+    el.className   = 'esys-pop';
+    el.textContent = `+${amount} XP`;
+    const r = wrap.getBoundingClientRect();
+    el.style.left = `${r.left + r.width / 2 - 28}px`;
+    el.style.top  = `${r.top  + r.height / 2}px`;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.style.transform = 'translateY(-60px) scale(1.15)';
+      el.style.opacity   = '0';
+    }));
+    setTimeout(() => el.remove(), 1100);
+  }
+
+  // ── Defeat sequence ────────────────────────────────────────────────────────
+  function defeat() {
+    if (!alive) return;
+    alive      = false;
+    dissolving = true;
+    hitPulse   = 2.5;
+
+    // Reward: 20% of current XP bar
+    const xp = window.xpSystem;
+    if (xp && xp.player) {
+      const reward = Math.ceil(xp.player.xpNeeded * 0.20);
+      showPop(reward);
+      setTimeout(() => xp.addXP(reward), 180);
+    }
+
+    // Let dissolve run for ~600ms then fade container out
+    setTimeout(() => {
+      esys.classList.add('hide');
+      esys.classList.remove('show');
+      setTimeout(() => {
+        esys.classList.remove('hide');
+        if (sketch) { sketch.remove(); sketch = null; wrap.innerHTML = ''; }
+        scheduleSpawn(randDelay());
+      }, 750);
+    }, 600);
+  }
+
+  // ── Spawn ──────────────────────────────────────────────────────────────────
+  function spawn() {
+    nameEl.textContent = rand(ENEMY_NAMES);
+    launchSketch();
+    // Double rAF ensures the class triggers a transition
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      esys.classList.add('show');
+    }));
+  }
+
+  function scheduleSpawn(delay) { setTimeout(spawn, delay); }
+
+  // ── Click handler — on both canvas wrapper and label ──────────────────────
+  wrap.addEventListener('click',  defeat);
+  meta.addEventListener('click',  defeat);
+
+  // ── Boot ───────────────────────────────────────────────────────────────────
+  function boot() {
+    if (!window.p5) {
+      const s = document.createElement('script');
+      s.src   = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js';
+      document.head.appendChild(s);
+    }
+    scheduleSpawn(FIRST_SPAWN_MS);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+})();
