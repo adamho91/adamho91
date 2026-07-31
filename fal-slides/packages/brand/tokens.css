@@ -1,0 +1,107 @@
+:root {
+  --fal-accent: #ADFF00;
+  --fal-accent-light: #C8FF66;
+  --fal-accent-pale: #E4FF99;
+  --fal-accent-dark: #7A9900;
+  --fal-accent-deep: #3D5A00;
+  --fal-accent-bg: #1A2210;
+  --fal-accent-a33: #ADFF0033;
+  --fal-accent-a18: #ADFF0018;
+
+  --fal-blue: #115EF3;
+  --fal-cyan: #99EDFF;
+  --fal-sky: #3FB5FE;
+  --fal-lt-blue: #C5E9FF;
+  --fal-green: #004012;
+  --fal-olive: #403700;
+  --fal-yellow: #FFFF00;
+  --fal-red: #EC0648;
+  --fal-pink: #F57EC3;
+  --fal-lt-pink: #FFC4D8;
+  --fal-sage: #96AFAC;
+  --fal-sage-lt: #E5ECE7;
+  --fal-brown-lt: #D9D7CC;
+  --fal-black: #000000;
+  --fal-white: #FFFFFF;
+
+  --fal-ui-bg: #111111;
+  --fal-ui-panel: #161616;
+  --fal-ui-panel-2: #1c1c1c;
+  --fal-ui-border: #2a2a2a;
+  --fal-ui-border-strong: #3a3a3a;
+  --fal-ui-text: #eee;
+  --fal-ui-muted: #888;
+  --fal-ui-dim: #555;
+
+  --fal-font-display: "Focal Upright", sans-serif;
+  --fal-font-text: "Focal Text", sans-serif;
+  --fal-font-mono: "HAL Timezone Mono", ui-monospace, monospace;
+
+  --fal-slide-w: 1920;
+  --fal-slide-h: 1080;
+  --fal-slide-ratio: 16 / 9;
+}
+
+@font-face {
+  font-family: "Focal Upright";
+  src: url("./fonts/Focal-Upright-VF_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Extrabold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Focal Text";
+  src: url("./fonts/FocalText-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "HAL Timezone Mono";
+  src: url("./fonts/HALTimezone-MonoRegular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
