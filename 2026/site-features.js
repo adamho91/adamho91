@@ -1,10 +1,15 @@
 /* ISP 2026 site features — audio, UI themes, recent-activity, silh-title, knock/stamp */
 (function () {
 function __pretextOnReady(fn) {
+  var run = function () {
+    try { fn(); } catch (err) {
+      console.error('[site-features] ready callback failed', err);
+    }
+  };
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fn);
+    document.addEventListener('DOMContentLoaded', run);
   } else {
-    fn();
+    run();
   }
 };
   if (!document.getElementById('pretext-site-features-css')) {
@@ -15,6 +20,7 @@ function __pretextOnReady(fn) {
   }
 
   /* ---- load-font-chance.js ---- */
+  try {
 
 (function () {
   // Load-effect probe: ?loadSweep=N reloads N times and tallies fires in localStorage.
@@ -49,8 +55,12 @@ function __pretextOnReady(fn) {
   }
 })();
 
+  } catch (err) {
+    console.error('[site-features] load-font-chance.js failed', err);
+  }
 
   /* ---- sound.js ---- */
+  try {
 
 (function () {
   var MAX_CONCURRENT = 3;
@@ -412,8 +422,12 @@ function __pretextOnReady(fn) {
   }
 })();
 
+  } catch (err) {
+    console.error('[site-features] sound.js failed', err);
+  }
 
   /* ---- pause-audio.js ---- */
+  try {
 
 __pretextOnReady(() => {
   const sounds = {
@@ -787,8 +801,12 @@ __pretextOnReady(() => {
   console.log('Main track slot:', activeSlot, sounds[activeSlot]);
 });
 
+  } catch (err) {
+    console.error('[site-features] pause-audio.js failed', err);
+  }
 
   /* ---- superscript.js ---- */
+  try {
 
 (function () {
   var MIN = 2, MAX = 5;
@@ -825,8 +843,12 @@ __pretextOnReady(() => {
   window.addEventListener("load", run);
 })();
 
+  } catch (err) {
+    console.error('[site-features] superscript.js failed', err);
+  }
 
   /* ---- ui-bar-theme.js ---- */
+  try {
 
 (function () {
   /** 3 color sets — grey (default), black, magenta */
@@ -970,8 +992,12 @@ __pretextOnReady(() => {
   });
 })();
 
+  } catch (err) {
+    console.error('[site-features] ui-bar-theme.js failed', err);
+  }
 
   /* ---- recent-activity.js ---- */
+  try {
 __pretextOnReady(function () {
   var triggers = document.querySelectorAll('.update-indiv');
   var allCards = document.querySelectorAll('.recent-cards');
@@ -2647,8 +2673,12 @@ __pretextOnReady(function () {
     if (goingDown) dismissCardsOneByOne();
   }, { passive: true });
 });
+  } catch (err) {
+    console.error('[site-features] recent-activity.js failed', err);
+  }
 
   /* ---- silh-typewriter-or-main.js ---- */
+  try {
 
 __pretextOnReady(() => {
     const style = document.createElement('style');
@@ -3758,8 +3788,12 @@ window.xpSystem = {
 
 window.xpSystem.init();
 
+  } catch (err) {
+    console.error('[site-features] silh-typewriter-or-main.js failed', err);
+  }
 
   /* ---- silh-misc-88.js ---- */
+  try {
 
 (function () {
   /* ===================== CONFIG ===================== */
@@ -3907,8 +3941,12 @@ window.xpSystem.init();
   }
 })();
 
+  } catch (err) {
+    console.error('[site-features] silh-misc-88.js failed', err);
+  }
 
   /* ---- silh-split.js ---- */
+  try {
 
 (function () {
   function isSilhWhitespace(char) {
@@ -3940,8 +3978,12 @@ window.xpSystem.init();
   window.pretextIsSilhWhitespace = isSilhWhitespace;
 })();
 
+  } catch (err) {
+    console.error('[site-features] silh-split.js failed', err);
+  }
 
   /* ---- silh-axes.js ---- */
+  try {
 
 const DEFAULT_AXES = {
   wght: [88, 175],   // weight axis (locked during randomize; Shift+=/- adjust live)
@@ -4424,8 +4466,12 @@ scheduleSilhAxisFlipOnLoad();
   resetIdleTimer();
 })();
 
+  } catch (err) {
+    console.error('[site-features] silh-axes.js failed', err);
+  }
 
   /* ---- silh-knockdown.js ---- */
+  try {
 
 /* ===============================================================
    Knock-down physics v3 (inter-letter AABB stack)
@@ -5475,8 +5521,12 @@ scheduleSilhAxisFlipOnLoad();
   });
 })();
 
+  } catch (err) {
+    console.error('[site-features] silh-knockdown.js failed', err);
+  }
 
   /* ---- case-peak-hover.js ---- */
+  try {
 
 (function () {
   const TRIGGER_SEL = '.case-peak-link';
@@ -5748,8 +5798,12 @@ scheduleSilhAxisFlipOnLoad();
   }
 })();
 
+  } catch (err) {
+    console.error('[site-features] case-peak-hover.js failed', err);
+  }
 
   /* ---- silh-tab-focus.js ---- */
+  try {
 
   (function () {
     function wireSilhLetterTabFocus(root) {
@@ -5803,8 +5857,12 @@ scheduleSilhAxisFlipOnLoad();
     });
   })();
 
+  } catch (err) {
+    console.error('[site-features] silh-tab-focus.js failed', err);
+  }
 
   /* ---- silh-jitter.js ---- */
+  try {
 
   __pretextOnReady(function () {
     const titles = document.querySelectorAll(".silh-title");
@@ -5940,8 +5998,12 @@ scheduleSilhAxisFlipOnLoad();
     }
   });
 
+  } catch (err) {
+    console.error('[site-features] silh-jitter.js failed', err);
+  }
 
   /* ---- silh-stamp-shuffle.js ---- */
+  try {
 
 (function () {
   /** Multi-letter silh scale stamp — `;` / Semicolon (was Shift+T). */
@@ -6278,4 +6340,7 @@ scheduleSilhAxisFlipOnLoad();
   });
 })();
 
+  } catch (err) {
+    console.error('[site-features] silh-stamp-shuffle.js failed', err);
+  }
 })();
