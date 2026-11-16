@@ -417,9 +417,10 @@ function __pretextOnReady(fn) {
 
 __pretextOnReady(() => {
   const sounds = {
-    morning: "https://raw.githubusercontent.com/adamho91/adamho91/main/1Dreaming_MistLogic.wav",
-    afternoon: "https://raw.githubusercontent.com/adamho91/adamho91/main/2Thinking_SignalSorting.wav",
-    night: "https://raw.githubusercontent.com/adamho91/adamho91/main/3Doing_ProcessBloom_260316.wav"
+    // jsDelivr serves audio/wav (raw.githubusercontent.com is octet-stream).
+    morning: "https://cdn.jsdelivr.net/gh/adamho91/adamho91@main/1Dreaming_MistLogic.wav",
+    afternoon: "https://cdn.jsdelivr.net/gh/adamho91/adamho91@main/2Thinking_SignalSorting.wav",
+    night: "https://cdn.jsdelivr.net/gh/adamho91/adamho91@main/3Doing_ProcessBloom_260316.wav"
   };
 
   function currentTrackSlot() {
@@ -449,8 +450,7 @@ __pretextOnReady(() => {
     return isPlaying && !userStopped && !audio.paused && !audio.ended;
   };
 
-  // GitHub raw serves these as application/octet-stream, which <audio> won't
-  // decode in Chromium. Cache typed blob: URLs so play actually works.
+  // Prefer typed blob: URLs so play stays reliable across hosts/MIME quirks.
   const trackBlobUrls = Object.create(null);
   const trackBlobPending = Object.create(null);
 
@@ -552,12 +552,21 @@ __pretextOnReady(() => {
     }
     syncCurrentTrackSlot();
     if (canStartMainTrackToday()) armUnlockPlayListener();
-    else document.removeEventListener('click', tryUnlockPlay);
+    else disarmUnlockPlayListener();
+  }
+
+  function disarmUnlockPlayListener() {
+    document.removeEventListener('pointerdown', tryUnlockPlay, true);
+    document.removeEventListener('keydown', tryUnlockPlay, true);
+    document.removeEventListener('click', tryUnlockPlay, true);
   }
 
   function armUnlockPlayListener() {
-    document.removeEventListener('click', tryUnlockPlay);
-    document.addEventListener('click', tryUnlockPlay);
+    disarmUnlockPlayListener();
+    // Capture + pointer/key so the first gesture after password gate still unlocks.
+    document.addEventListener('pointerdown', tryUnlockPlay, true);
+    document.addEventListener('keydown', tryUnlockPlay, true);
+    document.addEventListener('click', tryUnlockPlay, true);
   }
 
   function clearFade() {
@@ -762,7 +771,7 @@ __pretextOnReady(() => {
     if (userStopped || isPlaying || !canStartMainTrackToday()) return;
     safePlay(true, {
       autoDaily: true,
-      onStarted: () => document.removeEventListener('click', tryUnlockPlay),
+      onStarted: () => disarmUnlockPlayListener(),
     });
   }
 
@@ -772,6 +781,8 @@ __pretextOnReady(() => {
   window.addEventListener('focus', syncMainTrackState);
   setInterval(syncMainTrackState, 60000);
   syncMainTrackState();
+  // Warm the current daypart track so the first gesture can play immediately.
+  resolveTrackBlobUrl(activeSlot).catch(() => {});
 
   console.log('Main track slot:', activeSlot, sounds[activeSlot]);
 });
