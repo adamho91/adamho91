@@ -340,7 +340,7 @@ var gf=Object.create;var{getPrototypeOf:hf,defineProperty:gN,getOwnPropertyNames
     background: #fff !important;
     overflow: hidden !important;
   }
-  body.pretext-sand-blank-canvas > *:not(.pretext-sand-screen-brush-host):not(.pretext-sand-pq-stamps):not(#pretext-fallen-letter-layer):not(.pretext-sand-brush-cursor):not(.pretext-sand-paint-grip-stack) {
+  body.pretext-sand-blank-canvas > *:not(.pretext-sand-screen-brush-host):not(.pretext-sand-pq-stamps):not(#pretext-fallen-letter-layer):not(.pretext-sand-brush-cursor):not(.pretext-sand-paint-grip-stack):not(#lotgd-device-chassis):not(#pretext-lotgd-power):not(#pretext-lotgd-side-dock):not(#pretext-lotgd-forest):not(.plgd-activity-chat) {
     visibility: hidden !important;
     pointer-events: none !important;
   }
