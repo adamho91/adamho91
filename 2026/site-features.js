@@ -4324,7 +4324,9 @@ function scheduleSilhAxisFlipOnLoad() {
 scheduleSilhAxisFlipOnLoad();
 
 // ====== MAIN ======
+// Wait for DOM — Webflow freeform head can run before .silh-title exists.
 (function () {
+  const bootSilhAxesMain = () => {
   // Combine both classes
   const titles = Array.from(document.querySelectorAll('.silh-title, .spawned-letter'));
   if (!titles.length) return;
@@ -4464,6 +4466,13 @@ scheduleSilhAxisFlipOnLoad();
   // kick off
   startInterval();
   resetIdleTimer();
+  };
+
+  if (document.readyState === 'loading') {
+    __pretextOnReady(bootSilhAxesMain, { once: true });
+  } else {
+    bootSilhAxesMain();
+  }
 })();
 
   } catch (err) {
