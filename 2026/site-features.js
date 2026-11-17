@@ -4789,6 +4789,31 @@ scheduleSilhAxisFlipOnLoad();
   }
 
   /**
+   * Giant V · extrude AABBs swallow half the viewport. Letters whose centers sit
+   * deep inside that filled rect used to resolve every frame (jitter + Matter
+   * thrash). Only near-surface contact is real support / shove.
+   */
+  const EXTRUDE_AABB_EDGE_BAND = 56;
+
+  function letterNearExtrudeSurface(A, box) {
+    const bw = box.maxX - box.minX;
+    const bh = box.maxY - box.minY;
+    if (bw < EXTRUDE_AABB_EDGE_BAND * 2.5 && bh < EXTRUDE_AABB_EDGE_BAND * 2.5) return true;
+    const cx = (A.minX + A.maxX) * 0.5;
+    const cy = (A.minY + A.maxY) * 0.5;
+    const inside =
+      cx >= box.minX && cx <= box.maxX && cy >= box.minY && cy <= box.maxY;
+    if (!inside) return true;
+    const distToEdge = Math.min(
+      cx - box.minX,
+      box.maxX - cx,
+      cy - box.minY,
+      box.maxY - cy,
+    );
+    return distToEdge <= EXTRUDE_AABB_EDGE_BAND;
+  }
+
+  /**
    * Wake settled chips and transfer extrude velocity into letter bodies so
    * V · extruded meshes and silh titles shove each other (not static walls).
    */
@@ -4807,6 +4832,8 @@ scheduleSilhAxisFlipOnLoad();
         const overlapX = Math.min(A.maxX, box.maxX) - Math.max(A.minX, box.minX);
         const overlapY = Math.min(A.maxY, box.maxY) - Math.max(A.minY, box.minY);
         if (overlapX <= 0 || overlapY <= 0) continue;
+        // Skip deep-inside hits on huge extrudes — those are AABB lies, not contact.
+        if (!letterNearExtrudeSurface(A, box)) continue;
         if (b.settled) {
           b.el.__settled = false;
           b.settled = false;
@@ -4840,6 +4867,7 @@ scheduleSilhAxisFlipOnLoad();
     const overlapX = Math.min(A.maxX, box.maxX) - Math.max(A.minX, box.minX);
     const overlapY = Math.min(A.maxY, box.maxY) - Math.max(A.minY, box.minY);
     if (overlapX <= 0 || overlapY <= 0) return false;
+    if (!letterNearExtrudeSurface(A, box)) return false;
 
     let nx, ny, overlap;
     if (overlapX < overlapY) {
