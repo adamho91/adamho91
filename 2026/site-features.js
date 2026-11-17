@@ -4487,6 +4487,7 @@ scheduleSilhAxisFlipOnLoad();
    - Click/dblclick any .case-peak-link to fall.
    - Press "F" to drop .silh-title letters currently in the viewport.
    - On load, a 5% chance plays the F fall on every on-screen title letter.
+   - On load, a 5% chance titles already look like Shift+T ×5–10 (end state, no key spam).
    - `,` / `.` / `/` share the 5 · V and R · V knock group (side knock, floor hole).
    - Active letters collide with peers + settled supports (AABB stack),
      like extruded box fall — not pass-through to one floor pile.
@@ -5369,6 +5370,13 @@ scheduleSilhAxisFlipOnLoad();
   /** Extra load rolls: fall after growing titles as if Shift+T were pressed N times (±2px each). */
   const LOAD_FALL_SIZE_15_CHANCE = 0.05;
   const LOAD_FALL_SIZE_30_CHANCE = 0.01;
+  /**
+   * Standalone size roll (no fall): titles already look like Shift+T was hit 5–10×.
+   * Applied as one end-state bump — no simulated keydown spam.
+   */
+  const LOAD_SHIFT_T_SIZE_CHANCE = 0.05;
+  const LOAD_SHIFT_T_PRESSES_MIN = 5;
+  const LOAD_SHIFT_T_PRESSES_MAX = 10;
   const SILH_SHIFT_T_PX = 2;
 
   /**
@@ -5421,15 +5429,16 @@ scheduleSilhAxisFlipOnLoad();
   window.__pretextAdjustFallenLetterSize = adjustFallenLetterSize;
 
 
-  function boostSilhTitleByShiftTPresses(presses) {
+  function boostSilhTitleByShiftTPresses(presses, opts) {
     const delta = presses * SILH_SHIFT_T_PX;
+    const tighten = opts && opts.tightenTrack === true;
     document.querySelectorAll('.silh-title').forEach((el) => {
       const px = parseFloat(getComputedStyle(el).fontSize) || 16;
       el.style.fontSize = Math.max(6, px + delta) + 'px';
-      // Bigger load-chance titles: tighter track (~−4%).
-      el.style.letterSpacing = '-0.04em';
+      // Fall-sized load rolls: tighter track (~−4%). Plain Shift+T end-state skips this.
+      if (tighten) el.style.letterSpacing = '-0.04em';
     });
-    // Measure after the grow, before letters leave flow for the fall.
+    // Measure after the grow (and before letters leave flow when a fall follows).
     syncBottomStackToSilhTitles();
   }
 
@@ -5471,12 +5480,27 @@ scheduleSilhAxisFlipOnLoad();
           if (sizeRoll < LOAD_FALL_SIZE_30_CHANCE) sizePresses = 30;
           else if (sizeRoll < LOAD_FALL_SIZE_30_CHANCE + LOAD_FALL_SIZE_15_CHANCE) sizePresses = 15;
           const plainFall = Math.random() < LOAD_FALL_ALL_CHANCE;
-          if (!sizePresses && !plainFall) return;
+          // Separate 5% — titles already at Shift+T ×5–10 (end state only, no fall).
+          let quietShiftT = 0;
+          if (!sizePresses && Math.random() < LOAD_SHIFT_T_SIZE_CHANCE) {
+            quietShiftT =
+              LOAD_SHIFT_T_PRESSES_MIN +
+              Math.floor(
+                Math.random() * (LOAD_SHIFT_T_PRESSES_MAX - LOAD_SHIFT_T_PRESSES_MIN + 1),
+              );
+          }
+          if (!sizePresses && !plainFall && !quietShiftT) return;
           if (sizePresses === 30) window.__pretextNoteLoadEffect?.('silh-fall-size-30');
           else if (sizePresses === 15) window.__pretextNoteLoadEffect?.('silh-fall-size-15');
           if (plainFall) window.__pretextNoteLoadEffect?.('silh-fall-plain');
           if (sizePresses || plainFall) window.__pretextNoteLoadEffect?.('silh-fall-any');
-          if (sizePresses) boostSilhTitleByShiftTPresses(sizePresses);
+          if (quietShiftT) {
+            window.__pretextNoteLoadEffect?.('silh-shift-t-quiet');
+            window.__pretextNoteLoadEffect?.(`silh-shift-t-${quietShiftT}`);
+            boostSilhTitleByShiftTPresses(quietShiftT, { tightenTrack: false });
+          }
+          if (sizePresses) boostSilhTitleByShiftTPresses(sizePresses, { tightenTrack: true });
+          if (!sizePresses && !plainFall) return;
           const drop = () => {
             if (loadFallAborted) return;
             fallAllSilhLetters();
