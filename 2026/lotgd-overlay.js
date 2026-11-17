@@ -503,6 +503,24 @@ var Kd=Object.create;var{getPrototypeOf:Gd,defineProperty:nW,getOwnPropertyNames
   display: inline-block;
   white-space: nowrap;
 }
+/* Legendary pets — same silver/violet sweep as astral weapon labels. */
+.plgd-pet-device__name-text--astral {
+  background: linear-gradient(
+    90deg,
+    #c8c8d8,
+    #a090c8,
+    #7a5cb0,
+    #e8e0f8,
+    #b8a0e0,
+    #9080c0,
+    #c8c8d8
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: plgd-pet-name-astral 5.5s linear infinite;
+}
 .plgd-pet-device--name-ticker .plgd-pet-device__name {
   text-overflow: clip;
 }
@@ -510,10 +528,18 @@ var Kd=Object.create;var{getPrototypeOf:Gd,defineProperty:nW,getOwnPropertyNames
   /* One marquee pass, then idle — full cycle 20s. */
   animation: plgd-pet-name-marquee 20s ease-in-out infinite;
 }
+.plgd-pet-device--name-ticker .plgd-pet-device__name-text--astral {
+  animation:
+    plgd-pet-name-marquee 20s ease-in-out infinite,
+    plgd-pet-name-astral 5.5s linear infinite;
+}
 @keyframes plgd-pet-name-marquee {
   0%, 6% { transform: translateX(0); }
   18%, 28% { transform: translateX(calc(-1 * var(--plgd-pet-name-overflow, 0px))); }
   40%, 100% { transform: translateX(0); }
+}
+@keyframes plgd-pet-name-astral {
+  to { background-position: 200% center; }
 }
 .plgd-pet-device__stat {
   opacity: 0.9;
@@ -557,6 +583,13 @@ var Kd=Object.create;var{getPrototypeOf:Gd,defineProperty:nW,getOwnPropertyNames
 @media (prefers-reduced-motion: reduce) {
   .plgd-pet-device--wep-ticker .plgd-pet-device__wep-text { animation: none; }
   .plgd-pet-device--name-ticker .plgd-pet-device__name-text { animation: none; }
+  .plgd-pet-device__name-text--astral {
+    animation: none;
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: #7a5cb0;
+  }
 }
 .plgd-pet-device__mood {
   font-variation-settings: "wght" 120, "MONO" 100, "SANS" 0;
@@ -571,7 +604,7 @@ var Kd=Object.create;var{getPrototypeOf:Gd,defineProperty:nW,getOwnPropertyNames
   overflow: hidden;
   text-overflow: ellipsis;
 }
-`}var E$0="#b8e000";function u$0($){return $.weaponName?`${$.dmg} dmg · ${$.weaponName}`:`${$.dmg} dmg`}function b$0($){let J=$.querySelector(".plgd-pet-device__wep-track"),Z=$.querySelector(".plgd-pet-device__wep-text");if(!J||!Z||J.hidden){$.classList.remove("plgd-pet-device--wep-ticker"),$.style.removeProperty("--plgd-pet-wep-overflow");return}let Q=Math.ceil(Z.scrollWidth-J.clientWidth);if(Q>1)$.style.setProperty("--plgd-pet-wep-overflow",`${Q}px`),$.classList.add("plgd-pet-device--wep-ticker");else $.classList.remove("plgd-pet-device--wep-ticker"),$.style.removeProperty("--plgd-pet-wep-overflow")}function S$0($){let J=$.querySelector(".plgd-pet-device__name"),Z=$.querySelector(".plgd-pet-device__name-text");if(!J||!Z){$.classList.remove("plgd-pet-device--name-ticker"),$.style.removeProperty("--plgd-pet-name-overflow");return}let Q=Math.ceil(Z.scrollWidth-J.clientWidth);if(Q>1)$.style.setProperty("--plgd-pet-name-overflow",`${Q}px`),$.classList.add("plgd-pet-device--name-ticker");else $.classList.remove("plgd-pet-device--name-ticker"),$.style.removeProperty("--plgd-pet-name-overflow")}function oO($){b$0($),S$0($)}function g$0($,J){let Z=Math.max(0,Math.min(3,J.packCount||0)),Q=Math.max(0,Math.min(2,J.viewSlot||0));$.querySelectorAll(".plgd-pet-device__pack-orb").forEach((q,z)=>{let Y=z<Z,X=Y&&z===Q;q.style.fill=Y?E$0:"",q.style.opacity=Y?X?"1":"0.72":"",q.style.cursor=J.dualLead&&Y?"pointer":"default",q.style.pointerEvents=J.dualLead&&Y?"auto":"none",q.setAttribute("data-slot",String(z)),q.setAttribute("aria-label",Y?`Companion slot ${z+1}`:`Empty slot ${z+1}`)})}function Yh($,J){let Z=$.querySelector(".plgd-pet-device__name"),Q=$.querySelector(".plgd-pet-device__level"),j=$.querySelector(".plgd-pet-device__mood"),q=$.querySelector(".plgd-pet-device__dmg-prefix"),z=$.querySelector(".plgd-pet-device__wep-track"),Y=$.querySelector(".plgd-pet-device__wep-text"),X=$.querySelector(".plgd-pet-device__xp"),K=$.querySelector(".plgd-pet-device__dmg");if(Z instanceof HTMLElement){let G=Z.querySelector(".plgd-pet-device__name-text");if(!G)G=document.createElement("span"),G.className="plgd-pet-device__name-text",Z.replaceChildren(G);G.textContent=J.name,Z.style.color=J.rarityColor,s9(Z,`${J.rarity}. ${J.traitBlurb}`)}if(Q)Q.textContent=`Lv ${J.level}`;if(j)j.textContent=J.happinessLabel,j.style.color=J.elated?vK:CK(J.happiness);if(q)q.textContent=J.weaponName?`${J.dmg} dmg · `:`${J.dmg} dmg`;if(Y)Y.textContent=J.weaponName??"";if(z)z.hidden=!J.weaponName;if(K)s9(K,u$0(J));if(X instanceof HTMLElement){let G=J.maxed?"Max bond":`Bond ${J.exp}/${J.expNeed}`;X.textContent=J.trait?`${J.trait} · ${G}`:G,s9(X,J.traitBlurb)}g$0($,J),$.setAttribute("aria-label",`Pet ${J.name}`)}function Xh($,J){$.classList.toggle("plgd-pet-device--pack-live",!!(J.dualLead&&J.packCount>1)),Yh($,J),requestAnimationFrame(()=>{requestAnimationFrame(()=>oO($))})}function Vh($){let J=document.createElement("div");if(J.className="plgd-pet-device",$.dualLead&&$.packCount>1)J.classList.add("plgd-pet-device--pack-live");J.dataset.petKey=`${$.visualSeed}:${$.name}:${$.formStage}:${$.formDark?1:0}`,J.setAttribute("aria-label",`Pet ${$.name}`),J.onPetSlotClick=null;let Z=document.createElement("div");Z.className="plgd-pet-device__chrome",Z.innerHTML=k$0(),J.appendChild(Z),Z.addEventListener("click",(w)=>{let H=w.target;if(!(H instanceof Element))return;let D=H.closest(".plgd-pet-device__pack-orb");if(!D||D.style.pointerEvents==="none")return;let P=Number(D.getAttribute("data-slot")||"0");J.onPetSlotClick?.(P)});let Q=document.createElement("div");Q.className="plgd-pet-device__screen";let j=document.createElement("div");j.className="plgd-pet-device__body";let q=document.createElement("div");q.className="plgd-pet-device__stats";let z=document.createElement("div");z.className="plgd-pet-device__avatar",z.setAttribute("aria-hidden","true");let Y=document.createElementNS("http://www.w3.org/2000/svg","svg");Y.classList.add("plgd-pet-device__avatar-glyph"),z.appendChild(Y);let X={stage:$.formStage,dark:$.formDark};Qh(Y,$.visualSeed,iO,$.id,X);let K=jh(Y,$.visualSeed,$.id,X),G=document.createElement("div");G.className="plgd-pet-device__name";let U=document.createElement("span");U.className="plgd-pet-device__name-text",G.appendChild(U),q.appendChild(G);let W=document.createElement("div");W.className="plgd-pet-device__stat plgd-pet-device__level",q.appendChild(W);let V=document.createElement("div");V.className="plgd-pet-device__mood",q.appendChild(V);let M=document.createElement("div");M.className="plgd-pet-device__stat plgd-pet-device__dmg";let F=document.createElement("span");F.className="plgd-pet-device__dmg-prefix";let N=document.createElement("span");N.className="plgd-pet-device__wep-track";let O=document.createElement("span");O.className="plgd-pet-device__wep-text",N.appendChild(O),M.appendChild(F),M.appendChild(N),q.appendChild(M);let v=document.createElement("div");v.className="plgd-pet-device__xp",q.appendChild(v),j.appendChild(q),j.appendChild(z),Q.appendChild(j),J.appendChild(Q),Yh(J,$);let R=new ResizeObserver(()=>oO(J));return R.observe(N),R.observe(G),requestAnimationFrame(()=>{requestAnimationFrame(()=>oO(J))}),J.destroyPetEyes=()=>{K(),R.disconnect()},J}var sO=366.25,Fh=566.25;var h$0=465,Kh=72.5,c$0=248.75,lO=4,qW=12,Gh=27.5;function m$0(){let $=qh(sO);return`
+`}var E$0="#b8e000";function u$0($){return $.weaponName?`${$.dmg} dmg · ${$.weaponName}`:`${$.dmg} dmg`}function b$0($){let J=$.querySelector(".plgd-pet-device__wep-track"),Z=$.querySelector(".plgd-pet-device__wep-text");if(!J||!Z||J.hidden){$.classList.remove("plgd-pet-device--wep-ticker"),$.style.removeProperty("--plgd-pet-wep-overflow");return}let Q=Math.ceil(Z.scrollWidth-J.clientWidth);if(Q>1)$.style.setProperty("--plgd-pet-wep-overflow",`${Q}px`),$.classList.add("plgd-pet-device--wep-ticker");else $.classList.remove("plgd-pet-device--wep-ticker"),$.style.removeProperty("--plgd-pet-wep-overflow")}function S$0($){let J=$.querySelector(".plgd-pet-device__name"),Z=$.querySelector(".plgd-pet-device__name-text");if(!J||!Z){$.classList.remove("plgd-pet-device--name-ticker"),$.style.removeProperty("--plgd-pet-name-overflow");return}let Q=Math.ceil(Z.scrollWidth-J.clientWidth);if(Q>1)$.style.setProperty("--plgd-pet-name-overflow",`${Q}px`),$.classList.add("plgd-pet-device--name-ticker");else $.classList.remove("plgd-pet-device--name-ticker"),$.style.removeProperty("--plgd-pet-name-overflow")}function oO($){b$0($),S$0($)}function g$0($,J){let Z=Math.max(0,Math.min(3,J.packCount||0)),Q=Math.max(0,Math.min(2,J.viewSlot||0));$.querySelectorAll(".plgd-pet-device__pack-orb").forEach((q,z)=>{let Y=z<Z,X=Y&&z===Q;q.style.fill=Y?E$0:"",q.style.opacity=Y?X?"1":"0.72":"",q.style.cursor=J.dualLead&&Y?"pointer":"default",q.style.pointerEvents=J.dualLead&&Y?"auto":"none",q.setAttribute("data-slot",String(z)),q.setAttribute("aria-label",Y?`Companion slot ${z+1}`:`Empty slot ${z+1}`)})}function Yh($,J){let Z=$.querySelector(".plgd-pet-device__name"),Q=$.querySelector(".plgd-pet-device__level"),j=$.querySelector(".plgd-pet-device__mood"),q=$.querySelector(".plgd-pet-device__dmg-prefix"),z=$.querySelector(".plgd-pet-device__wep-track"),Y=$.querySelector(".plgd-pet-device__wep-text"),X=$.querySelector(".plgd-pet-device__xp"),K=$.querySelector(".plgd-pet-device__dmg");if(Z instanceof HTMLElement){let G=Z.querySelector(".plgd-pet-device__name-text");if(!G)G=document.createElement("span"),G.className="plgd-pet-device__name-text",Z.replaceChildren(G);G.textContent=J.name;let U=J.rarity==="Legendary";G.classList.toggle("plgd-pet-device__name-text--astral",U),Z.style.color=U?"":J.rarityColor,s9(Z,`${J.rarity}. ${J.traitBlurb}`)}if(Q)Q.textContent=`Lv ${J.level}`;if(j)j.textContent=J.happinessLabel,j.style.color=J.elated?vK:CK(J.happiness);if(q)q.textContent=J.weaponName?`${J.dmg} dmg · `:`${J.dmg} dmg`;if(Y)Y.textContent=J.weaponName??"";if(z)z.hidden=!J.weaponName;if(K)s9(K,u$0(J));if(X instanceof HTMLElement){let G=J.maxed?"Max bond":`Bond ${J.exp}/${J.expNeed}`;X.textContent=J.trait?`${J.trait} · ${G}`:G,s9(X,J.traitBlurb)}g$0($,J),$.setAttribute("aria-label",`Pet ${J.name}`)}function Xh($,J){$.classList.toggle("plgd-pet-device--pack-live",!!(J.dualLead&&J.packCount>1)),Yh($,J),requestAnimationFrame(()=>{requestAnimationFrame(()=>oO($))})}function Vh($){let J=document.createElement("div");if(J.className="plgd-pet-device",$.dualLead&&$.packCount>1)J.classList.add("plgd-pet-device--pack-live");J.dataset.petKey=`${$.visualSeed}:${$.name}:${$.formStage}:${$.formDark?1:0}`,J.setAttribute("aria-label",`Pet ${$.name}`),J.onPetSlotClick=null;let Z=document.createElement("div");Z.className="plgd-pet-device__chrome",Z.innerHTML=k$0(),J.appendChild(Z),Z.addEventListener("click",(w)=>{let H=w.target;if(!(H instanceof Element))return;let D=H.closest(".plgd-pet-device__pack-orb");if(!D||D.style.pointerEvents==="none")return;let P=Number(D.getAttribute("data-slot")||"0");J.onPetSlotClick?.(P)});let Q=document.createElement("div");Q.className="plgd-pet-device__screen";let j=document.createElement("div");j.className="plgd-pet-device__body";let q=document.createElement("div");q.className="plgd-pet-device__stats";let z=document.createElement("div");z.className="plgd-pet-device__avatar",z.setAttribute("aria-hidden","true");let Y=document.createElementNS("http://www.w3.org/2000/svg","svg");Y.classList.add("plgd-pet-device__avatar-glyph"),z.appendChild(Y);let X={stage:$.formStage,dark:$.formDark};Qh(Y,$.visualSeed,iO,$.id,X);let K=jh(Y,$.visualSeed,$.id,X),G=document.createElement("div");G.className="plgd-pet-device__name";let U=document.createElement("span");U.className="plgd-pet-device__name-text",G.appendChild(U),q.appendChild(G);let W=document.createElement("div");W.className="plgd-pet-device__stat plgd-pet-device__level",q.appendChild(W);let V=document.createElement("div");V.className="plgd-pet-device__mood",q.appendChild(V);let M=document.createElement("div");M.className="plgd-pet-device__stat plgd-pet-device__dmg";let F=document.createElement("span");F.className="plgd-pet-device__dmg-prefix";let N=document.createElement("span");N.className="plgd-pet-device__wep-track";let O=document.createElement("span");O.className="plgd-pet-device__wep-text",N.appendChild(O),M.appendChild(F),M.appendChild(N),q.appendChild(M);let v=document.createElement("div");v.className="plgd-pet-device__xp",q.appendChild(v),j.appendChild(q),j.appendChild(z),Q.appendChild(j),J.appendChild(Q),Yh(J,$);let R=new ResizeObserver(()=>oO(J));return R.observe(N),R.observe(G),requestAnimationFrame(()=>{requestAnimationFrame(()=>oO(J))}),J.destroyPetEyes=()=>{K(),R.disconnect()},J}var sO=366.25,Fh=566.25;var h$0=465,Kh=72.5,c$0=248.75,lO=4,qW=12,Gh=27.5;function m$0(){let $=qh(sO);return`
 .lotgd-device-chassis {
   position: fixed;
   left: 50%;
