@@ -1112,6 +1112,7 @@ __pretextOnReady(() => {
 
   /* ---- recent-activity.js ---- */
   try {
+
 __pretextOnReady(function () {
   var triggers = document.querySelectorAll('.update-indiv');
   var allCards = document.querySelectorAll('.recent-cards');
@@ -2669,18 +2670,29 @@ __pretextOnReady(function () {
     });
   });
 
-  var LOAD_OPEN_ALL_CARDS_CHANCE = 0.05;
+  var LOAD_OPEN_CARDS_CHANCE = 0.05;
   var CARD_STAGGER_MS = 90;
   var dismissing = false;
   var openingAllCards = false;
 
   function maybeOpenAllActivityCardsOnLoad() {
-    if (Math.random() >= LOAD_OPEN_ALL_CARDS_CHANCE) return;
-    window.__pretextNoteLoadEffect && window.__pretextNoteLoadEffect('open-all-activity-cards');
+    if (Math.random() >= LOAD_OPEN_CARDS_CHANCE) return;
     if (!cardControllers.length) return;
     armClickAwayGuard();
-    var toOpen = cardControllers.filter(function (c) { return !!c.pin; });
-    if (!toOpen.length) return;
+    var pool = cardControllers.filter(function (c) { return !!c.pin; });
+    if (!pool.length) return;
+    // Shuffle, then open a random count from 1..all (was always all).
+    for (var s = pool.length - 1; s > 0; s--) {
+      var sJ = Math.floor(Math.random() * (s + 1));
+      var sTmp = pool[s];
+      pool[s] = pool[sJ];
+      pool[sJ] = sTmp;
+    }
+    var openCount = 1 + Math.floor(Math.random() * pool.length);
+    var toOpen = pool.slice(0, openCount);
+    window.__pretextNoteLoadEffect && window.__pretextNoteLoadEffect(
+      'open-activity-cards:' + toOpen.length + '/' + pool.length,
+    );
     openingAllCards = true;
     playRandomMenuToggleB();
 
