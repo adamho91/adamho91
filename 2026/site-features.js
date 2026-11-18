@@ -464,16 +464,29 @@ __pretextOnReady(() => {
     const st = document.createElement('style');
     st.id = 'pretext-track-ticker-style';
     st.textContent =
-      /* Inline ticker beside Webflow's audio row — do not flex .div-block-254
-         (that stretched .small play/pause icons to the ticker's line box). */
+      /* Keep play/pause content-sized (nav cube rows are width:100% for labels). */
+      '.gui-nav-container .div-block-254{' +
+      'align-items:center;' +
+      '}' +
+      '.gui-nav-container .div-block-254 > .nav-ia-container{' +
+      'flex:0 0 auto;width:auto;' +
+      '}' +
+      '.gui-nav-container .div-block-254 .startaudio,' +
+      '.gui-nav-container .div-block-254 .stopaudio{' +
+      'width:auto;flex:0 0 auto;' +
+      '}' +
+      '.gui-nav-container .div-block-254 .startaudio .nav-input-container[data-nav-cube],' +
+      '.gui-nav-container .div-block-254 .stopaudio .nav-input-container[data-nav-cube]{' +
+      'width:auto;max-width:max-content;flex-grow:0;' +
+      '}' +
       '.gui-nav-container .div-block-254 .startaudio .nav-spacer img,' +
       '.gui-nav-container .div-block-254 .stopaudio .nav-spacer img{' +
       'width:15px;height:12px;max-width:15px;max-height:12px;display:block;' +
       '}' +
       '.gui-nav-container .pretext-track-ticker{' +
-      'display:inline-block;vertical-align:middle;margin-left:8px;' +
+      'display:flex;align-items:center;align-self:center;margin-left:8px;' +
       'max-width:11.5em;overflow:hidden;white-space:nowrap;color:#212122;' +
-      'pointer-events:none;user-select:none;line-height:1;' +
+      'pointer-events:none;user-select:none;line-height:1;min-height:100%;' +
       '}' +
       '.gui-nav-container .pretext-track-ticker-track{' +
       'display:inline-flex;align-items:center;width:max-content;will-change:transform;' +
@@ -2971,6 +2984,13 @@ style.textContent = `
     perspective: 1100px;
     perspective-origin: 50% 50%;
     z-index: 0;
+  }
+  /* Play/pause stay content-sized — full-width cube rows are for labeled nav. */
+  .gui-nav-container .startaudio .nav-input-container[data-nav-cube],
+  .gui-nav-container .stopaudio .nav-input-container[data-nav-cube] {
+    width: auto;
+    max-width: max-content;
+    flex-grow: 0;
   }
   /* Keep hover hit-testing on the 2D row box so 3D face spins don't
      fire mouseleave (that was cutting the nav hover sound). */
