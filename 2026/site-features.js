@@ -3582,6 +3582,8 @@ document.addEventListener('scroll', () => {
 
 __pretextOnReady(() => {
     mountNavCubeHovers();
+    // Head-loaded site-features runs before CMS images exist — remount here.
+    mountIndexImageCubes();
     shuffleContent();
     shuffleIndexPreviewProjects();
     animateNavRowsSequentially();
@@ -3600,6 +3602,7 @@ document.addEventListener('keypress', (e) => {
         });
         shuffleContent();
         shuffleIndexPreviewProjects();
+        mountIndexImageCubes();
         animateNavRowsSequentially();
         animateProjectTabsSequentially();
         animateIndexImageCubesIn();
