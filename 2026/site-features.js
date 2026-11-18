@@ -429,6 +429,7 @@ function __pretextOnReady(fn) {
   /* ---- pause-audio.js ---- */
   try {
 
+
 __pretextOnReady(() => {
   const sounds = {
     // jsDelivr serves audio/wav (raw.githubusercontent.com is octet-stream).
@@ -444,7 +445,105 @@ __pretextOnReady(() => {
     return 'night';
   }
 
+  /** Filename stem of the daypart WAV — shown next to pause in the panel. */
+  function trackTitleForSlot(slot) {
+    const url = sounds[slot] || '';
+    const file = url.split('/').pop() || '';
+    return file.replace(/\.[^.]+$/, '') || slot;
+  }
+
   let activeSlot = currentTrackSlot();
+  let trackTickerEl = null;
+  let trackTickerTrack = null;
+  const TRACK_TICKER_GAP_PX = 28;
+  const TRACK_TICKER_DURATION_SEC = 14;
+
+  function ensureTrackTickerStyles() {
+    if (document.getElementById('pretext-track-ticker-style')) return;
+    const st = document.createElement('style');
+    st.id = 'pretext-track-ticker-style';
+    st.textContent =
+      '.gui-nav-container .div-block-254{display:flex;align-items:center;flex-wrap:nowrap;}' +
+      '.gui-nav-container .pretext-track-ticker{' +
+      'margin-left:8px;max-width:11.5em;overflow:hidden;white-space:nowrap;color:#212122;' +
+      'pointer-events:none;user-select:none;line-height:1;display:block;' +
+      '}' +
+      '.gui-nav-container .pretext-track-ticker-track{' +
+      'display:inline-flex;align-items:center;width:max-content;will-change:transform;' +
+      'animation:pretext-track-ticker-marquee var(--pretext-track-ticker-duration,14s) linear infinite;' +
+      'animation-play-state:paused;' +
+      '}' +
+      '.gui-nav-container .pretext-track-ticker-item{' +
+      'flex:0 0 auto;padding-right:var(--pretext-track-ticker-gap,28px);' +
+      '}' +
+      '.gui-nav-container .pretext-track-ticker.is-playing .pretext-track-ticker-track{' +
+      'animation-play-state:running;' +
+      '}' +
+      /* Two equal segments (title+gap); -50%→0 scrolls right without a jump. */
+      '@keyframes pretext-track-ticker-marquee{' +
+      '0%{transform:translateX(-50%);}100%{transform:translateX(0);}' +
+      '}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function isMainTrackAudiblyPlaying() {
+    return isPlaying && !userStopped && !audio.paused && !audio.ended;
+  }
+
+  function syncTrackTickerMotion() {
+    if (!trackTickerEl) return;
+    trackTickerEl.classList.toggle('is-playing', isMainTrackAudiblyPlaying());
+  }
+
+  function fillTrackTicker(title) {
+    if (!trackTickerTrack) return;
+    trackTickerTrack.replaceChildren();
+    // Two copies so the rightward loop can seam without a jump.
+    for (let i = 0; i < 2; i++) {
+      const span = document.createElement('span');
+      span.className = 'pretext-track-ticker-item';
+      span.textContent = title;
+      if (i === 1) span.setAttribute('aria-hidden', 'true');
+      trackTickerTrack.appendChild(span);
+    }
+    trackTickerTrack.style.setProperty('--pretext-track-ticker-gap', TRACK_TICKER_GAP_PX + 'px');
+    trackTickerTrack.style.setProperty(
+      '--pretext-track-ticker-duration',
+      TRACK_TICKER_DURATION_SEC + 's',
+    );
+  }
+
+  function mountTrackTicker() {
+    ensureTrackTickerStyles();
+    const host = document.querySelector('.gui-nav-container .div-block-254');
+    if (!host) return;
+    if (!trackTickerEl) {
+      trackTickerEl = host.querySelector('.pretext-track-ticker');
+    }
+    if (!trackTickerEl) {
+      trackTickerEl = document.createElement('div');
+      trackTickerEl.className = 'pretext-track-ticker caption-text-a mono';
+      trackTickerEl.setAttribute('aria-live', 'polite');
+      host.appendChild(trackTickerEl);
+    }
+    trackTickerTrack = trackTickerEl.querySelector('.pretext-track-ticker-track');
+    if (!trackTickerTrack) {
+      trackTickerTrack = document.createElement('div');
+      trackTickerTrack.className = 'pretext-track-ticker-track';
+      trackTickerEl.replaceChildren(trackTickerTrack);
+    }
+    fillTrackTicker(trackTitleForSlot(activeSlot));
+    syncTrackTickerMotion();
+  }
+
+  function updateTrackTicker() {
+    if (!trackTickerEl || !trackTickerTrack) {
+      mountTrackTicker();
+      return;
+    }
+    fillTrackTicker(trackTitleForSlot(activeSlot));
+    syncTrackTickerMotion();
+  }
 
   const audio = document.createElement('audio');
   audio.preload = 'auto';
@@ -455,21 +554,24 @@ __pretextOnReady(() => {
   audio.style.display = 'none';
   document.body.appendChild(audio);
 
+  // Declared early so ticker motion helpers can read play state above.
+  let isPlaying = false;
+  let userStopped = false;
+
   function notifyMainTrackPlayingChange() {
+    syncTrackTickerMotion();
     document.dispatchEvent(new CustomEvent('pretext-main-track-playing', {
-      detail: { playing: isPlaying && !userStopped && !audio.paused && !audio.ended }
+      detail: { playing: isMainTrackAudiblyPlaying() }
     }));
   }
   window.__pretextIsMainTrackPlaying = function () {
-    return isPlaying && !userStopped && !audio.paused && !audio.ended;
+    return isMainTrackAudiblyPlaying();
   };
 
   // Prefer typed blob: URLs so play stays reliable across hosts/MIME quirks.
   const trackBlobUrls = Object.create(null);
   const trackBlobPending = Object.create(null);
 
-  let isPlaying = false;
-  let userStopped = false;
   let fadeInterval = null;
   let watchdogInterval = null;
   let playGeneration = 0;
@@ -548,8 +650,12 @@ __pretextOnReady(() => {
 
   function syncCurrentTrackSlot() {
     const slot = currentTrackSlot();
-    if (slot === activeSlot) return slot;
+    if (slot === activeSlot) {
+      updateTrackTicker();
+      return slot;
+    }
     activeSlot = slot;
+    updateTrackTicker();
     if (!isPlaying) {
       if (trackBlobUrls[slot]) applyTrackSrc(trackBlobUrls[slot]);
     }
@@ -795,6 +901,7 @@ __pretextOnReady(() => {
   window.addEventListener('focus', syncMainTrackState);
   setInterval(syncMainTrackState, 60000);
   syncMainTrackState();
+  mountTrackTicker();
   // Warm the current daypart track so the first gesture can play immediately.
   resolveTrackBlobUrl(activeSlot).catch(() => {});
 
@@ -4482,6 +4589,7 @@ scheduleSilhAxisFlipOnLoad();
   /* ---- silh-knockdown.js ---- */
   try {
 
+
 /* ===============================================================
    Knock-down physics v3 (inter-letter AABB stack)
    - Click/dblclick any .case-peak-link to fall.
@@ -4797,19 +4905,36 @@ scheduleSilhAxisFlipOnLoad();
   const EXTRUDE_AABB_EDGE_BAND = 56;
 
   function letterNearExtrudeSurface(A, box) {
+    const lcx = (A.minX + A.maxX) * 0.5;
+    const lcy = (A.minY + A.maxY) * 0.5;
+    if (box.cx != null && box.cy != null && box.hw != null && box.hh != null) {
+      const hw = box.hw;
+      const hh = box.hh;
+      if (hw * 2 < EXTRUDE_AABB_EDGE_BAND * 2.5 && hh * 2 < EXTRUDE_AABB_EDGE_BAND * 2.5) {
+        return true;
+      }
+      const ang = box.angle || 0;
+      const dx = lcx - box.cx;
+      const dy = lcy - box.cy;
+      const c = Math.cos(-ang);
+      const s = Math.sin(-ang);
+      const lx = dx * c - dy * s;
+      const ly = dx * s + dy * c;
+      const inside = Math.abs(lx) <= hw && Math.abs(ly) <= hh;
+      if (!inside) return true;
+      return Math.min(hw - Math.abs(lx), hh - Math.abs(ly)) <= EXTRUDE_AABB_EDGE_BAND;
+    }
     const bw = box.maxX - box.minX;
     const bh = box.maxY - box.minY;
     if (bw < EXTRUDE_AABB_EDGE_BAND * 2.5 && bh < EXTRUDE_AABB_EDGE_BAND * 2.5) return true;
-    const cx = (A.minX + A.maxX) * 0.5;
-    const cy = (A.minY + A.maxY) * 0.5;
     const inside =
-      cx >= box.minX && cx <= box.maxX && cy >= box.minY && cy <= box.maxY;
+      lcx >= box.minX && lcx <= box.maxX && lcy >= box.minY && lcy <= box.maxY;
     if (!inside) return true;
     const distToEdge = Math.min(
-      cx - box.minX,
-      box.maxX - cx,
-      cy - box.minY,
-      box.maxY - cy,
+      lcx - box.minX,
+      box.maxX - lcx,
+      lcy - box.minY,
+      box.maxY - lcy,
     );
     return distToEdge <= EXTRUDE_AABB_EDGE_BAND;
   }
@@ -4862,9 +4987,16 @@ scheduleSilhAxisFlipOnLoad();
     return n;
   }
 
-  /** Treat a static AABB (extruded brush-5 mesh) as an immovable support. */
+  /**
+   * Treat an extruded brush-5 mesh as an immovable support.
+   * Prefer oriented footprint (cx/cy/hw/hh/angle) so chips rest on the tilted
+   * plank — AABB-only resolution made every support feel like a flat lid.
+   */
   function resolveBodyVsAabb(a, box) {
     const A = bodyAABB(a);
+    if (box.cx != null && box.cy != null && box.hw != null && box.hh != null) {
+      return resolveBodyVsOriented(a, A, box);
+    }
     const overlapX = Math.min(A.maxX, box.maxX) - Math.max(A.minX, box.minX);
     const overlapY = Math.min(A.maxY, box.maxY) - Math.max(A.minY, box.minY);
     if (overlapX <= 0 || overlapY <= 0) return false;
@@ -4881,6 +5013,48 @@ scheduleSilhAxisFlipOnLoad();
       overlap = overlapY;
     }
 
+    return applyExtrudeContact(a, box, nx, ny, overlap, (box.minX + box.maxX) * 0.5);
+  }
+
+  /** Local-space AABB resolve against a rotated extrude, normal mapped to screen. */
+  function resolveBodyVsOriented(a, A, box) {
+    const ang = box.angle || 0;
+    const hw = box.hw;
+    const hh = box.hh;
+    const lhw = (A.maxX - A.minX) * 0.5;
+    const lhh = (A.maxY - A.minY) * 0.5;
+    const cos = Math.cos(-ang);
+    const sin = Math.sin(-ang);
+    const dx = a.cx - box.cx;
+    const dy = a.cy - box.cy;
+    const lx = dx * cos - dy * sin;
+    const ly = dx * sin + dy * cos;
+    // Expand OBB by letter half-extents (axis-aligned in local — good enough for chips).
+    const ex = hw + lhw;
+    const ey = hh + lhh;
+    if (Math.abs(lx) > ex || Math.abs(ly) > ey) return false;
+    if (!letterNearExtrudeSurface(A, box)) return false;
+
+    const penX = ex - Math.abs(lx);
+    const penY = ey - Math.abs(ly);
+    let lnx, lny, overlap;
+    if (penX < penY) {
+      lnx = lx < 0 ? -1 : 1;
+      lny = 0;
+      overlap = penX;
+    } else {
+      lnx = 0;
+      lny = ly < 0 ? -1 : 1;
+      overlap = penY;
+    }
+    const c = Math.cos(ang);
+    const s = Math.sin(ang);
+    const nx = lnx * c - lny * s;
+    const ny = lnx * s + lny * c;
+    return applyExtrudeContact(a, box, nx, ny, overlap, box.cx, ang, lny < 0);
+  }
+
+  function applyExtrudeContact(a, box, nx, ny, overlap, pivotX, surfaceAngle, onTopFace) {
     a.cx += nx * overlap;
     a.cy += ny * overlap;
 
@@ -4898,14 +5072,20 @@ scheduleSilhAxisFlipOnLoad();
         a.vx += jt * tx;
         a.vy += jt * ty;
       }
-      if (ny !== 0) {
-        const dx = a.cx - (box.minX + box.maxX) * 0.5;
+      if (ny < -0.25 || onTopFace) {
+        const dx = a.cx - pivotX;
         a.av += clamp(dx * 0.012, -1.2, 1.2);
-        a.a = clamp(a.a + clamp(dx * 0.0004, -0.06, 0.06), -MAX_TILT_AT_REST * 1.4, MAX_TILT_AT_REST * 1.4);
+        // Ease chip tilt toward the plank angle so piles read on the slant.
+        if (typeof surfaceAngle === 'number' && Math.abs(surfaceAngle) > 1e-4) {
+          const blend = clamp(surfaceAngle * 0.35, -MAX_TILT_AT_REST, MAX_TILT_AT_REST);
+          a.a = clamp(a.a * 0.85 + blend * 0.15, -MAX_TILT_AT_REST * 1.4, MAX_TILT_AT_REST * 1.4);
+        } else {
+          a.a = clamp(a.a + clamp(dx * 0.0004, -0.06, 0.06), -MAX_TILT_AT_REST * 1.4, MAX_TILT_AT_REST * 1.4);
+        }
         a.av *= 0.82;
       }
     }
-    if (ny < 0) a.grounded = true;
+    if (ny < -0.25 || onTopFace) a.grounded = true;
     return true;
   }
 
@@ -5053,6 +5233,21 @@ scheduleSilhAxisFlipOnLoad();
     if (!letterFloorOpen && extrudes && extrudes.length) {
       for (let k = 0; k < extrudes.length; k++) {
         const box = extrudes[k];
+        if (box.cx != null && box.cy != null && box.hw != null && box.hh != null) {
+          // Resting on the upward face of the oriented plank (not the AABB lid).
+          const ang = box.angle || 0;
+          const cos = Math.cos(-ang);
+          const sin = Math.sin(-ang);
+          const dx = b.cx - box.cx;
+          const dy = b.cy - box.cy;
+          const lx = dx * cos - dy * sin;
+          const ly = dx * sin + dy * cos;
+          const lhh = (aabb.maxY - aabb.minY) * 0.5;
+          if (Math.abs(lx) > box.hw + 2) continue;
+          // Letter bottom near local top edge (y increases down).
+          if (Math.abs((ly + lhh) - (-box.hh)) <= SUPPORT_SLACK_PX + 3) return true;
+          continue;
+        }
         const overlapX = Math.min(aabb.maxX, box.maxX) - Math.max(aabb.minX, box.minX);
         if (overlapX <= 1) continue;
         if (Math.abs(aabb.maxY - box.minY) <= SUPPORT_SLACK_PX + 2) return true;
