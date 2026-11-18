@@ -686,7 +686,9 @@ var Ed=Object.create;var{getPrototypeOf:ud,defineProperty:qF,getOwnPropertyNames
   padding: 2.5px;
   background: linear-gradient(93.21deg, #292929 -5.97%, #dcdcdc 118.57%);
   box-shadow: inset 0 2.5px 2.5px rgba(0, 0, 0, 0.45);
-  border-radius: 5px;
+  /* 1px top/bottom soften — overflow clips the white fill so corners stay round. */
+  border-radius: 1px;
+  overflow: hidden;
   display: flex;
   cursor: grab;
 }
@@ -696,7 +698,7 @@ var Ed=Object.create;var{getPrototypeOf:ud,defineProperty:qF,getOwnPropertyNames
   width: 100%;
   min-height: 0;
   background: #fff;
-  border-radius: 5px;
+  border-radius: 0;
   overflow: hidden;
   position: relative;
   cursor: grab;
@@ -1426,6 +1428,7 @@ __|          ;     |MM"MM"""""---..._______...--""MM"MM]                   |
 #pretext-lotgd-forest .plgd-tessa {
   display: flex; align-items: stretch; justify-content: space-between; gap: 8px;
   width: 100%; background: var(--ui-bar, #888); padding: 3px 0 2px 4px;
+  border-radius: 1px 1px 0 0;
   cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
 }
 #pretext-lotgd-forest[data-dragging="true"] .plgd-tessa { cursor: grabbing; }
@@ -2215,6 +2218,18 @@ html[data-lotgd-castle-cover] .plgd-activity-chat {
   flex-shrink: 0;
   transition: background 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     color 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+/* Bottom edge of the action stack — 1px round on the last row only. */
+#pretext-lotgd-forest .plgd-actions > .plgd-action:last-child {
+  border-radius: 0 0 1px 1px;
+}
+#pretext-lotgd-forest .plgd-actions.plgd-actions--cols > .plgd-action:last-child:not(.plgd-action--wide),
+#pretext-lotgd-forest .plgd-actions.plgd-actions--combat > .plgd-action:last-child:not(.plgd-action--wide) {
+  border-radius: 0 0 1px 0;
+}
+#pretext-lotgd-forest .plgd-actions.plgd-actions--cols > .plgd-action:nth-last-child(2):not(.plgd-action--wide),
+#pretext-lotgd-forest .plgd-actions.plgd-actions--combat > .plgd-action:nth-last-child(2):not(.plgd-action--wide) {
+  border-radius: 0 0 0 1px;
 }
 #pretext-lotgd-forest .plgd-action.plgd-action--idle-tint:not(.plgd-action--loc-hover) {
   --plgd-action-hover: color-mix(in srgb, var(--plgd-idle-bg, var(--ui-bar, #888)) 78%, #ffffff);
