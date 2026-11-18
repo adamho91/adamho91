@@ -430,6 +430,7 @@ function __pretextOnReady(fn) {
   try {
 
 
+
 __pretextOnReady(() => {
   const sounds = {
     // jsDelivr serves audio/wav (raw.githubusercontent.com is octet-stream).
@@ -463,10 +464,16 @@ __pretextOnReady(() => {
     const st = document.createElement('style');
     st.id = 'pretext-track-ticker-style';
     st.textContent =
-      '.gui-nav-container .div-block-254{display:flex;align-items:center;flex-wrap:nowrap;}' +
+      /* Inline ticker beside Webflow's audio row — do not flex .div-block-254
+         (that stretched .small play/pause icons to the ticker's line box). */
+      '.gui-nav-container .div-block-254 .startaudio .nav-spacer img,' +
+      '.gui-nav-container .div-block-254 .stopaudio .nav-spacer img{' +
+      'width:15px;height:12px;max-width:15px;max-height:12px;display:block;' +
+      '}' +
       '.gui-nav-container .pretext-track-ticker{' +
-      'margin-left:8px;max-width:11.5em;overflow:hidden;white-space:nowrap;color:#212122;' +
-      'pointer-events:none;user-select:none;line-height:1;display:block;' +
+      'display:inline-block;vertical-align:middle;margin-left:8px;' +
+      'max-width:11.5em;overflow:hidden;white-space:nowrap;color:#212122;' +
+      'pointer-events:none;user-select:none;line-height:1;' +
       '}' +
       '.gui-nav-container .pretext-track-ticker-track{' +
       'display:inline-flex;align-items:center;width:max-content;will-change:transform;' +
