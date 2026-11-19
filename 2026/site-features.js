@@ -441,8 +441,9 @@ __pretextOnReady(() => {
 
   function currentTrackSlot() {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'morning';
-    if (hour >= 12 && hour < 18) return 'afternoon';
+    // Three equal 8-hour cycles from 05:00 local: morning · afternoon · night.
+    if (hour >= 5 && hour < 13) return 'morning';
+    if (hour >= 13 && hour < 21) return 'afternoon';
     return 'night';
   }
 
@@ -602,7 +603,9 @@ __pretextOnReady(() => {
   const MAIN_TRACK_PLAY_KEY = 'pretext-main-track-played';
 
   function mainTrackDayKey() {
+    // Cycle day rolls at 05:00 so the night window (21–05) stays one gate.
     const d = new Date();
+    if (d.getHours() < 5) d.setDate(d.getDate() - 1);
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${d.getFullYear()}-${m}-${day}`;
