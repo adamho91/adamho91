@@ -466,7 +466,7 @@ __pretextOnReady(() => {
     st.textContent =
       /* Keep play/pause content-sized (nav cube rows are width:100% for labels). */
       '.gui-nav-container .div-block-254{' +
-      'align-items:center;' +
+      'display:flex;align-items:center;width:100%;' +
       '}' +
       '.gui-nav-container .div-block-254 > .nav-ia-container{' +
       'flex:0 0 auto;width:auto;' +
@@ -484,9 +484,12 @@ __pretextOnReady(() => {
       'width:15px;height:12px;max-width:15px;max-height:12px;display:block;' +
       '}' +
       '.gui-nav-container .pretext-track-ticker{' +
-      'display:flex;align-items:center;align-self:center;margin-left:8px;' +
-      'max-width:11.5em;overflow:hidden;white-space:nowrap;color:#212122;' +
+      'display:flex;align-items:center;align-self:stretch;margin-left:8px;' +
+      'flex:1 1 auto;min-width:0;max-width:none;overflow:hidden;white-space:nowrap;color:#212122;' +
       'pointer-events:none;user-select:none;line-height:1;min-height:100%;' +
+      // Soft clip: ~7px fade to transparent on both edges (fills to panel right).
+      '-webkit-mask-image:linear-gradient(to right,transparent 0,black 7px,black calc(100% - 7px),transparent 100%);' +
+      'mask-image:linear-gradient(to right,transparent 0,black 7px,black calc(100% - 7px),transparent 100%);' +
       '}' +
       '.gui-nav-container .pretext-track-ticker-track{' +
       'display:inline-flex;align-items:center;width:max-content;will-change:transform;' +
@@ -4801,12 +4804,40 @@ scheduleSilhAxisFlipOnLoad();
     return layer;
   }
 
+  /** Freeze sibling order before any letter leaves the parent — nextSibling goes stale mid-fall. */
+  function stampParentOrder(parent) {
+    if (!parent || parent.__silhOrdStamped) return;
+    let i = 0;
+    for (const n of parent.childNodes) {
+      if (n.nodeType === 1) {
+        n.__silhOrd = i;
+        i += 1;
+      }
+    }
+    parent.__silhOrdStamped = true;
+  }
+
+  function childOrd(el) {
+    if (el && el.__fall_orig && Number.isFinite(el.__fall_orig.childIndex)) {
+      return el.__fall_orig.childIndex;
+    }
+    if (el && Number.isFinite(el.__silhOrd)) return el.__silhOrd;
+    return 0;
+  }
+
   function fixAtCurrent(el, preRect) {
     const r = preRect || el.getBoundingClientRect();
     const scale = readCssScale(el);
     // Bake type BEFORE reparent — leaving .silh-title drops inherited vw/em size.
     const cs = getComputedStyle(el);
     if (!el.__fall_orig) {
+      const parent = el.parentNode;
+      stampParentOrder(parent);
+      const childIndex = Number.isFinite(el.__silhOrd)
+        ? el.__silhOrd
+        : parent
+          ? Array.prototype.indexOf.call(parent.children, el)
+          : 0;
       el.__fall_orig = {
         position: el.style.position, left: el.style.left, top: el.style.top,
         right: el.style.right, bottom: el.style.bottom, transform: el.style.transform,
@@ -4821,8 +4852,8 @@ scheduleSilhAxisFlipOnLoad();
         lineHeight: el.style.lineHeight,
         letterSpacing: el.style.letterSpacing,
         color: el.style.color,
-        parent: el.parentNode,
-        nextSibling: el.nextSibling
+        parent,
+        childIndex,
       };
     }
     const fontPx = parseFloat(cs.fontSize);
@@ -5399,19 +5430,9 @@ scheduleSilhAxisFlipOnLoad();
 
   function kick(){ if(!raf) raf = requestAnimationFrame(tick); }
 
-  function restoreFallOrig(el) {
+  function restoreFallStyles(el) {
     if (!el) return;
     if (el.__fall_orig) {
-      const parent = el.__fall_orig.parent;
-      const next = el.__fall_orig.nextSibling;
-      if (parent && parent.isConnected) {
-        try {
-          if (next && next.parentNode === parent) parent.insertBefore(el, next);
-          else parent.appendChild(el);
-        } catch (_) {
-          parent.appendChild(el);
-        }
-      }
       el.style.position = el.__fall_orig.position || '';
       el.style.left     = el.__fall_orig.left || '';
       el.style.top      = el.__fall_orig.top || '';
@@ -5439,6 +5460,47 @@ scheduleSilhAxisFlipOnLoad();
     byEl.delete(el);
   }
 
+  /** Put letters back by stamped index — not nextSibling (siblings often fell too). */
+  function reparentFallenInOrder(els) {
+    const byParent = new Map();
+    for (const el of els) {
+      const parent = el.__fall_orig && el.__fall_orig.parent;
+      if (!parent || !parent.isConnected) continue;
+      let list = byParent.get(parent);
+      if (!list) {
+        list = [];
+        byParent.set(parent, list);
+      }
+      list.push(el);
+    }
+    for (const [parent, fallen] of byParent) {
+      const members = [];
+      const seen = new Set();
+      for (const n of parent.childNodes) {
+        if (n.nodeType === 1) {
+          members.push(n);
+          seen.add(n);
+        }
+      }
+      for (const el of fallen) {
+        if (!seen.has(el)) {
+          members.push(el);
+          seen.add(el);
+        }
+      }
+      members.sort((a, b) => childOrd(a) - childOrd(b));
+      for (const el of members) parent.appendChild(el);
+      parent.__silhOrdStamped = false;
+    }
+  }
+
+  function restoreFallOrig(el) {
+    if (!el) return;
+    restoreFallStyles(el);
+    reparentFallenInOrder([el]);
+    delete el.__fall_orig;
+  }
+
   // Reset — instant style snap (no tween). Also used by sand scroll rewind /
   // scroll-up restore when a load fall never fully finished.
   function resetAll() {
@@ -5446,14 +5508,23 @@ scheduleSilhAxisFlipOnLoad();
     raf = null; lastTs = 0;
     letterFloorOpen = false;
     loadFallAborted = true;
+    const els = [];
+    const seen = new Set();
+    const push = (el) => {
+      if (!el || seen.has(el)) return;
+      if (!(el.__fall_orig || el.__falling || el.__settled)) return;
+      seen.add(el);
+      els.push(el);
+    };
     for (const set of [active, settled, culled]) {
-      for (const b of Array.from(set)) restoreFallOrig(b.el);
+      for (const b of Array.from(set)) push(b.el);
     }
     active.clear(); settled.clear(); culled.clear();
     // Orphans: mid-fall letters that left the sets, or typewriter-reveal races.
-    document.querySelectorAll('.silh-title > span, .spawned-letter, .case-peak-link').forEach((el) => {
-      if (el.__fall_orig || el.__falling || el.__settled) restoreFallOrig(el);
-    });
+    document.querySelectorAll('.silh-title > span, .spawned-letter, .case-peak-link').forEach(push);
+    for (const el of els) restoreFallStyles(el);
+    reparentFallenInOrder(els);
+    for (const el of els) delete el.__fall_orig;
     notifyLetterImpactChanged();
   }
   window.pretextResetFallenLetters = resetAll;
