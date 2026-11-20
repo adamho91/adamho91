@@ -1989,16 +1989,17 @@ ${Bc()}
   display: none !important;
 }
 #pretext-lotgd-forest .plgd-combo span {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
   box-sizing: border-box;
-  border: 1px dotted var(--ui-card-border, #000);
-  border-radius: 50%;
+  border: 1px solid var(--ui-card-border, #000);
+  border-radius: 999px;
   background: transparent;
+  overflow: hidden;
 }
 #pretext-lotgd-forest .plgd-combo span.is-on {
   background: #f0e500;
-  border-style: solid;
 }
 #pretext-lotgd-forest .plgd-energy-track {
   box-sizing: border-box;
