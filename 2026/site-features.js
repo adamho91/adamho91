@@ -3396,7 +3396,11 @@ function shuffleIndexPreviewProjects() {
     for (const el of [...withImg, ...withoutImg]) list.appendChild(el);
 }
 
-/** 2–3 on-screen Index images roll in; the rest stay put. Stagger so they don't chorus. */
+/**
+ * 2–3 on-screen Index images roll in; the rest stay put.
+ * Enter/reveal wait for `portfolio-lazy-reveal` so the photo is visible during
+ * the prism tumble (color hold used to finish ~2s after the cube had settled).
+ */
 function animateIndexImageCubesIn() {
     const hosts = Array.from(document.querySelectorAll('.preview-span .img-cube-host'));
     if (!hosts.length) return;
@@ -3406,6 +3410,28 @@ function animateIndexImageCubesIn() {
         });
         return;
     }
+
+    const faceImg = (host) => host.querySelector('.img-cube-face--0 img');
+    const whenLazyRevealed = (host, fn) => {
+        const img = faceImg(host);
+        if (!img) {
+            fn();
+            return;
+        }
+        if (img.classList.contains('is-loaded')) {
+            window.setTimeout(fn, 40 + Math.random() * 180);
+            return;
+        }
+        let done = false;
+        const run = () => {
+            if (done) return;
+            done = true;
+            fn();
+        };
+        img.addEventListener('portfolio-lazy-reveal', run, { once: true });
+        // Cached / stalled color jobs — don't leave the strip pending forever.
+        window.setTimeout(run, 3200);
+    };
 
     const run = () => {
         const strip = document.querySelector('.preview-span');
@@ -3429,14 +3455,16 @@ function animateIndexImageCubesIn() {
             if (chosen.has(host)) {
                 if (typeof host._imgCubePrepare !== 'function') return;
                 const fromDeg = Math.random() < 0.25 ? 90 : -90;
+                // Color faces sit at ±90 while the hold runs — the visible preloader.
                 host._imgCubePrepare(fromDeg);
-                const delay = 60 + Math.random() * 520;
-                window.setTimeout(() => {
+                whenLazyRevealed(host, () => {
                     if (typeof host._imgCubeEnter === 'function') host._imgCubeEnter();
-                }, delay);
+                });
                 return;
             }
-            if (typeof host._imgCubeReveal === 'function') host._imgCubeReveal();
+            whenLazyRevealed(host, () => {
+                if (typeof host._imgCubeReveal === 'function') host._imgCubeReveal();
+            });
         });
     };
 
