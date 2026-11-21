@@ -1,0 +1,5 @@
+node_modules/
+fal-slides/node_modules/
+fal-slides/apps/web/dist/
+fal-slides/**/.env.local
+.DS_Store

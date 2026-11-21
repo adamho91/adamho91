@@ -1,0 +1,502 @@
+[
+  {
+    "id": "builtin-transition",
+    "name": "Transition 1 (In / Out)",
+    "builtin": true,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#FFC4D8",
+      "#EC0648"
+    ],
+    "sliders": {
+      "pixSize": "60",
+      "pixAmt": "240",
+      "circlePct": "50",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 65.20026432946906
+  },
+  {
+    "id": "builtin-default",
+    "name": "Default",
+    "builtin": true,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#FFC4D8",
+      "#EC0648"
+    ],
+    "sliders": {
+      "pixSize": "60",
+      "pixAmt": "240",
+      "circlePct": "50",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "88",
+      "waveScale": "45",
+      "isolines": "4",
+      "animDuration": "3.5",
+      "burst": "1.75"
+    },
+    "noiseSeed": 42.5
+  },
+  {
+    "id": "user-1783390099219",
+    "name": "Transition 2 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#FFC4D8",
+      "#EC0648"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "10",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 121.26604584932343
+  },
+  {
+    "id": "user-1783390224952",
+    "name": "Transition 3 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#99EDFF"
+    ],
+    "sliders": {
+      "pixSize": "20",
+      "pixAmt": "240",
+      "circlePct": "13",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 58.6584921772588
+  },
+  {
+    "id": "user-1783390250925",
+    "name": "Transition 4 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#D9D7CC"
+    ],
+    "sliders": {
+      "pixSize": "60",
+      "pixAmt": "240",
+      "circlePct": "100",
+      "squarePct": "10",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 31.128638179862754
+  },
+  {
+    "id": "user-1783390336126",
+    "name": "Transition 5 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#C5E9FF",
+      "#115EF3"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "9",
+      "squarePct": "100",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 28.481455043468195
+  },
+  {
+    "id": "user-1783390407346",
+    "name": "Transition 6 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#96AFAC",
+      "#ADFF00"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "4",
+      "squarePct": "41",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 180.63656529577264
+  },
+  {
+    "id": "user-1783390450753",
+    "name": "Transition 7 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#99EDFF"
+    ],
+    "sliders": {
+      "pixSize": "20",
+      "pixAmt": "240",
+      "circlePct": "4",
+      "squarePct": "41",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 47.419831456491664
+  },
+  {
+    "id": "user-1783390489186",
+    "name": "Transition 8 (In / Out)",
+    "builtin": false,
+    "bg": "#ADFF00",
+    "animStyle": "halftone",
+    "colors": [
+      "#3FB5FE",
+      "#115EF3"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 32.202994116893535
+  },
+  {
+    "id": "user-1783390542517",
+    "name": "Transition 9 (In / Out)",
+    "builtin": false,
+    "bg": "#FFFF00",
+    "animStyle": "halftone",
+    "colors": [
+      "#403700",
+      "#ADFF00"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 130.3833689989878
+  },
+  {
+    "id": "user-1783390574790",
+    "name": "Transition 10 (In / Out)",
+    "builtin": false,
+    "bg": "#000000",
+    "animStyle": "halftone",
+    "colors": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 72.58001255557033
+  },
+  {
+    "id": "user-1783391410538",
+    "name": "Social 1",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#FFC4D8",
+      "#EC0648"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "10",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 121.26604584932343
+  },
+  {
+    "id": "user-1783391828862",
+    "name": "Social 2",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#99EDFF"
+    ],
+    "sliders": {
+      "pixSize": "20",
+      "pixAmt": "240",
+      "circlePct": "13",
+      "squarePct": "50",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 58.6584921772588
+  },
+  {
+    "id": "user-1783392035926",
+    "name": "Social 3",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#D9D7CC"
+    ],
+    "sliders": {
+      "pixSize": "60",
+      "pixAmt": "240",
+      "circlePct": "100",
+      "squarePct": "10",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 31.128638179862754
+  },
+  {
+    "id": "user-1783392192519",
+    "name": "Social 4",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#C5E9FF",
+      "#115EF3"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "9",
+      "squarePct": "100",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "70",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 28.481455043468195
+  },
+  {
+    "id": "user-1783393340111",
+    "name": "Social 5",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#96AFAC",
+      "#ADFF00"
+    ],
+    "sliders": {
+      "pixSize": "80",
+      "pixAmt": "240",
+      "circlePct": "4",
+      "squarePct": "41",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 180.63656529577264
+  },
+  {
+    "id": "user-1783393581648",
+    "name": "Social 6",
+    "builtin": false,
+    "bg": "#FFFFFF",
+    "animStyle": "voxel",
+    "colors": [
+      "#403700",
+      "#99EDFF"
+    ],
+    "sliders": {
+      "pixSize": "20",
+      "pixAmt": "240",
+      "circlePct": "4",
+      "squarePct": "41",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 47.419831456491664
+  },
+  {
+    "id": "user-1783393761651",
+    "name": "Social 7",
+    "builtin": false,
+    "bg": "#ADFF00",
+    "animStyle": "halftone",
+    "colors": [
+      "#3FB5FE",
+      "#115EF3"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 32.202994116893535
+  },
+  {
+    "id": "user-1783394013664",
+    "name": "Social 8",
+    "builtin": false,
+    "bg": "#FFFF00",
+    "animStyle": "halftone",
+    "colors": [
+      "#403700",
+      "#ADFF00"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 130.3833689989878
+  },
+  {
+    "id": "user-1783394033441",
+    "name": "Social 9",
+    "builtin": false,
+    "bg": "#000000",
+    "animStyle": "halftone",
+    "colors": [
+      "#000000",
+      "#FFFFFF"
+    ],
+    "sliders": {
+      "pixSize": "40",
+      "pixAmt": "240",
+      "circlePct": "7",
+      "squarePct": "82",
+      "clusterN": "4",
+      "scatter": "0",
+      "clusterDensity": "53",
+      "waveScale": "39",
+      "isolines": "4",
+      "animDuration": "4",
+      "burst": "1.75"
+    },
+    "noiseSeed": 175.12020133183321
+  }
+]
