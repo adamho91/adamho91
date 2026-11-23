@@ -2,15 +2,14 @@ var m=Object.create;var{getPrototypeOf:e,defineProperty:O,getOwnPropertyNames:i}
     .portfolio-lazy-host {
       background-color: var(--portfolio-lazy-color, #eaeaea);
     }
-    /* Recent Activity / Full Project List peeks: white chrome only. */
+    /* Recent Activity / Full Project List peeks: white chrome only.
+       Leave .tessa / .input-container alone so the dark title+date bar stays readable. */
     .recent-cards,
     .recent-cards .portfolio-lazy-host,
     .recent-cards .div-block-257,
     .recent-cards .div-block-258,
     .recent-cards .peak-container,
-    .recent-cards .tessa,
-    .recent-cards .recent-description-container,
-    .recent-cards .input-container {
+    .recent-cards .recent-description-container {
       --portfolio-lazy-color: #ffffff;
       background-color: #ffffff !important;
     }
