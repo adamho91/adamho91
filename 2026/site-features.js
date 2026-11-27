@@ -15,7 +15,7 @@ function __pretextOnReady(fn) {
   if (!document.getElementById('pretext-site-features-css')) {
     var st = document.createElement('style');
     st.id = 'pretext-site-features-css';
-    st.textContent = "/* Shared tokens — panel bars + recent activity hover/cards */\n:root {\n  --ui-bar: #888888;\n  --ui-bar-hover: #666666;\n  --ui-bar-text: #ffffff;\n  --ui-bar-border: #888888;\n  --ui-activity-hover: #fff200;\n  --ui-activity-text: #212122;\n  --ui-card-bg: #ffffff;\n  --ui-card-border: #000000;\n  --ui-card-text: #212122;\n}\n\n.nav-input-container {\n  background-color: var(--ui-bar) !important;\n  border-top-color: var(--ui-bar-border) !important;\n}\n.nav-input-container:hover {\n  background-color: var(--ui-bar-hover) !important;\n  border-top-color: var(--ui-bar-hover) !important;\n}\n.nav-input-container.cap {\n  border-bottom-color: var(--ui-bar-border) !important;\n}\n.nav-input-container .caption-text-a,\n.nav-input-container.top-banner .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\n.nav-input-container .nav-spacer img {\n  filter: var(--ui-bar-icon-filter, none);\n}\n\n.update-indiv:hover,\n.update-indiv.pretext-sand-hover,\n.update-indiv.pretext-activity-open {\n  background-color: var(--ui-activity-hover) !important;\n  color: var(--ui-activity-text);\n}\n.update-indiv:hover .t-body-1,\n.update-indiv.pretext-sand-hover .t-body-1,\n.update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text);\n}\n\n.recent-cards {\n  background-color: #ffffff !important;\n  --portfolio-lazy-color: #ffffff;\n  border-color: var(--ui-card-border) !important;\n  color: var(--ui-card-text);\n  contain: layout style paint;\n  /* Hidden from first paint so they never flash before the hover script\n     runs; the hover handler sets inline display:block to reveal on hover. */\n  display: none;\n}\n/* White chrome — no extracted portfolio-lazy color bars under caption.\n   Leave .tessa / .input-container alone so the dark title+date bar stays readable. */\n.recent-cards .div-block-257,\n.recent-cards .div-block-258,\n.recent-cards .portfolio-lazy-host,\n.recent-cards .peak-container,\n.recent-cards .recent-description-container {\n  background-color: #ffffff !important;\n  --portfolio-lazy-color: #ffffff;\n}\n/* Unpinned hover previews follow the cursor but never steal hits — yellow\n   row hover + pin stay on the .update-indiv trigger (browse and brush). */\n.recent-cards:not(.recent-card-pinned),\n.recent-cards:not(.recent-card-pinned) * {\n  pointer-events: none !important;\n}\n/* In brush mode keep unpinned previews under the paint host so strokes win. */\nbody:has(.pretext-sand-screen-brush-host:not(.pretext-sand-screen-brush-host--disabled))\n  .recent-cards:not(.recent-card-pinned) {\n  z-index: 100000001 !important;\n}\n/* Pinned cards keep their normal chrome (border, text, label) and can be\n   dragged around the canvas. Cursor (grab / grabbing) is driven inline by the\n   drag handlers, so don't force one here. */\n.recent-card-pinned {\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n/* Featured hover-scrub slides: Webflow only sets height (540/400/240).\n   Width comes from each image's own aspect-ratio (set as soon as the\n   thumb probe knows square / landscape / portrait) so captionelly\n   does not jump and landscape shots are not letterboxed into a square. */\n.projects-section .carouselly .cara-img {\n  width: auto;\n  object-fit: contain;\n}\n\n/* ============ INDEX / FEATURED STRIP (side-scroll only) ============ */\n/* Webflow ships .preview-span / .featured-preview-span with overflow:scroll,\n   which lets a vertical wheel/gesture scroll the strip box too. Constrain them\n   to horizontal-only so vertical intent falls through to the page instead.\n   Horizontal track height is always reserved with a transparent thumb; hover\n   only paints the thumb. That way the bar never appears/disappears as a\n   layout change and Featured Projects won’t shift a few pixels. */\n.preview-span,\n.featured-preview-span {\n  --pretext-h-scroll-bar: 12px;\n  overflow-x: auto;\n  overflow-y: hidden;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  scrollbar-width: thin;\n  -ms-overflow-style: auto;\n}\n.preview-span::-webkit-scrollbar,\n.featured-preview-span::-webkit-scrollbar {\n  width: 0;\n  height: var(--pretext-h-scroll-bar);\n  background: transparent;\n}\n.preview-span::-webkit-scrollbar:vertical,\n.featured-preview-span::-webkit-scrollbar:vertical {\n  display: none;\n  width: 0;\n  height: 0;\n}\n.preview-span::-webkit-scrollbar-track,\n.featured-preview-span::-webkit-scrollbar-track {\n  background: transparent;\n}\n.preview-span::-webkit-scrollbar-thumb,\n.featured-preview-span::-webkit-scrollbar-thumb {\n  background: transparent;\n  border-radius: 999px;\n}\n.preview-span:hover::-webkit-scrollbar-thumb,\n.featured-preview-span:hover::-webkit-scrollbar-thumb {\n  background: rgba(0, 0, 0, 0.28);\n}\n\n/* Project tabs (Index captions + Featured metadata): hidden until sequential\n   snap-in. No transition — opacity is a step, not a fade. */\n.preview-span .preview-caption-details,\n.projects-span .div-block-248 {\n  opacity: 0;\n}\n.preview-span .preview-caption-details.project-tab-in,\n.projects-span .div-block-248.project-tab-in {\n  opacity: 1;\n}\n\n/* ====================== SILH-TITLE ====================== */\n.silh-title {\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  -webkit-touch-callout: none;\n  -webkit-tap-highlight-color: rgba(0,0,0,0);\n  -webkit-user-drag: none;\n}\n\n.silh-title > span,\n.spawned-letter {\n  border-radius: 0;\n}\n\n.silh-title > span:focus-visible,\n.spawned-letter:focus-visible {\n  outline: none;\n  box-shadow: none;\n  border: 1px dotted #000;\n  border-radius: 0;\n}\n\n.silh-title:focus-visible {\n  outline: none;\n  box-shadow: none;\n  border: 1px dotted #000;\n  border-radius: 0;\n}\n\n.silh-title {\n  white-space: pre;\n}\n\n.silh-title > span.silh-ch-space {\n  display: inline-block;\n  width: 0.28em;\n  min-width: 0.28em;\n  pointer-events: none;\n}\n\n.updates-section .update-name,\n.updates-section .update-name .un-ghost,\n.updates-section .update-name .un-ticker,\n.updates-section .update-name .t-body-1 {\n  white-space: pre;\n}\n\n/* Mid-grey portfolio typography: ~5% load (mutually exclusive with magenta) */\nhtml.pretext-font-acacac {\n  --ui-activity-text: #acacac;\n  --ui-card-text: #acacac;\n}\nhtml.pretext-font-acacac .silh-title,\nhtml.pretext-font-acacac .spawned-letter,\nhtml.pretext-font-acacac .caption-text-a,\nhtml.pretext-font-acacac .t-body-1,\nhtml.pretext-font-acacac .project-caption,\nhtml.pretext-font-acacac .update-name,\nhtml.pretext-font-acacac .section-title {\n  color: #acacac !important;\n}\nhtml.pretext-font-acacac .nav-input-container .caption-text-a,\nhtml.pretext-font-acacac .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-acacac #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-acacac #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-acacac .update-indiv:hover .t-body-1,\nhtml.pretext-font-acacac .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-acacac .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-acacac .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n\n/* Hot pink portfolio typography: 1% load discovery or unlocked magenta panel */\nhtml.pretext-font-magenta .silh-title,\nhtml.pretext-font-magenta .spawned-letter,\nhtml.pretext-font-magenta .caption-text-a,\nhtml.pretext-font-magenta .t-body-1,\nhtml.pretext-font-magenta .project-caption,\nhtml.pretext-font-magenta .update-name,\nhtml.pretext-font-magenta .section-title,\nhtml[data-ui-bar-theme=\"magenta\"] .silh-title,\nhtml[data-ui-bar-theme=\"magenta\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"magenta\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .project-caption,\nhtml[data-ui-bar-theme=\"magenta\"] .update-name,\nhtml[data-ui-bar-theme=\"magenta\"] .section-title {\n  color: #ff0084 !important;\n}\nhtml.pretext-font-magenta .nav-input-container .caption-text-a,\nhtml.pretext-font-magenta .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-magenta #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-magenta #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-magenta .update-indiv:hover .t-body-1,\nhtml.pretext-font-magenta .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-magenta .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-magenta .recent-cards,\nhtml[data-ui-bar-theme=\"magenta\"] .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n\n/* Section headers sit above the carousel/graphic strips that follow them.\n   Shuffle (s) and stamp (;) move or scale letter spans with transforms that\n   bleed past the title row; without a lift, those glyphs paint under\n   .carouselly .cara-img { z-index: 1 } in the sibling block below. */\n.section-title {\n  position: relative;\n  z-index: 2;\n}\n";
+    st.textContent = "/* Shared tokens — panel bars + recent activity hover/cards */\n:root {\n  --ui-bar: #888888;\n  --ui-bar-hover: #666666;\n  --ui-bar-text: #ffffff;\n  --ui-bar-border: #888888;\n  --ui-activity-hover: #fff200;\n  --ui-activity-text: #212122;\n  --ui-card-bg: #ffffff;\n  --ui-card-border: #000000;\n  --ui-card-text: #212122;\n}\n\n.nav-input-container {\n  background-color: var(--ui-bar) !important;\n  border-top-color: var(--ui-bar-border) !important;\n}\n.nav-input-container:hover {\n  background-color: var(--ui-bar-hover) !important;\n  border-top-color: var(--ui-bar-hover) !important;\n}\n/* Tide / Ember — paint origin/projects chips; other modes keep Webflow grey. */\nhtml[data-ui-bar-theme=\"tide\"] .gui-nav-container .nav-input-container .input-container {\n  background-color: var(--ui-bar) !important;\n}\nhtml[data-ui-bar-theme=\"tide\"] .gui-nav-container .nav-input-container:hover .input-container {\n  background-color: var(--ui-bar-hover) !important;\n}\nhtml[data-ui-bar-theme=\"ember\"] .gui-nav-container .nav-input-container .input-container {\n  background-color: #FFEBEE !important;\n}\nhtml[data-ui-bar-theme=\"ember\"] .gui-nav-container .nav-input-container:hover .input-container {\n  background-color: #ffcdd2 !important;\n}\n.nav-input-container.cap {\n  border-bottom-color: var(--ui-bar-border) !important;\n}\n.nav-input-container .caption-text-a,\n.nav-input-container.top-banner .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\n.nav-input-container .nav-spacer img {\n  filter: var(--ui-bar-icon-filter, none);\n}\n\n/* Stone emboss / panel theme — legendary silver sweep on gui-nav rows. */\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container,\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container:hover {\n  background: linear-gradient(\n    90deg,\n    #8a8a8a,\n    #1a1a1a,\n    #000000,\n    #c8c8c8,\n    #ffffff,\n    #9e9e9e,\n    #8a8a8a\n  ) !important;\n  background-size: 200% auto !important;\n  animation: pretext-ui-bar-stone 4s linear infinite;\n  border-top-color: #c8c8c8 !important;\n}\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container.cap {\n  border-bottom-color: #c8c8c8 !important;\n}\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container:hover {\n  filter: brightness(1.1);\n}\n@keyframes pretext-ui-bar-stone {\n  to { background-position: 200% center; }\n}\n\n.update-indiv:hover,\n.update-indiv.pretext-sand-hover,\n.update-indiv.pretext-activity-open {\n  background-color: var(--ui-activity-hover) !important;\n  color: var(--ui-activity-text);\n}\n.update-indiv:hover .t-body-1,\n.update-indiv.pretext-sand-hover .t-body-1,\n.update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text);\n}\n\n.recent-cards {\n  background-color: #ffffff !important;\n  --portfolio-lazy-color: #ffffff;\n  border-color: var(--ui-card-border) !important;\n  color: var(--ui-card-text);\n  contain: layout style paint;\n  /* Hidden from first paint so they never flash before the hover script\n     runs; the hover handler sets inline display:block to reveal on hover. */\n  display: none;\n}\n/* White chrome — no extracted portfolio-lazy color bars under caption.\n   Leave .tessa / .input-container alone so the dark title+date bar stays readable. */\n.recent-cards .div-block-257,\n.recent-cards .div-block-258,\n.recent-cards .portfolio-lazy-host,\n.recent-cards .peak-container,\n.recent-cards .recent-description-container {\n  background-color: #ffffff !important;\n  --portfolio-lazy-color: #ffffff;\n}\n/* Unpinned hover previews follow the cursor but never steal hits — yellow\n   row hover + pin stay on the .update-indiv trigger (browse and brush). */\n.recent-cards:not(.recent-card-pinned),\n.recent-cards:not(.recent-card-pinned) * {\n  pointer-events: none !important;\n}\n/* In brush mode keep unpinned previews under the paint host so strokes win. */\nbody:has(.pretext-sand-screen-brush-host:not(.pretext-sand-screen-brush-host--disabled))\n  .recent-cards:not(.recent-card-pinned) {\n  z-index: 100000001 !important;\n}\n/* Pinned cards keep their normal chrome (border, text, label) and can be\n   dragged around the canvas. Cursor (grab / grabbing) is driven inline by the\n   drag handlers, so don't force one here. */\n.recent-card-pinned {\n  -webkit-user-select: none;\n  user-select: none;\n}\n\n/* Featured hover-scrub slides: Webflow only sets height (540/400/240).\n   Width comes from each image's own aspect-ratio (set as soon as the\n   thumb probe knows square / landscape / portrait) so captionelly\n   does not jump and landscape shots are not letterboxed into a square. */\n.projects-section .carouselly .cara-img {\n  width: auto;\n  object-fit: contain;\n}\n\n/* ============ INDEX / FEATURED STRIP (side-scroll only) ============ */\n/* Webflow ships .preview-span / .featured-preview-span with overflow:scroll,\n   which lets a vertical wheel/gesture scroll the strip box too. Constrain them\n   to horizontal-only so vertical intent falls through to the page instead.\n   Horizontal track height is always reserved with a transparent thumb; hover\n   only paints the thumb. That way the bar never appears/disappears as a\n   layout change and Featured Projects won’t shift a few pixels. */\n.preview-span,\n.featured-preview-span {\n  --pretext-h-scroll-bar: 12px;\n  overflow-x: auto;\n  overflow-y: hidden;\n  touch-action: pan-x;\n  overscroll-behavior-x: contain;\n  scrollbar-width: thin;\n  -ms-overflow-style: auto;\n}\n.preview-span::-webkit-scrollbar,\n.featured-preview-span::-webkit-scrollbar {\n  width: 0;\n  height: var(--pretext-h-scroll-bar);\n  background: transparent;\n}\n.preview-span::-webkit-scrollbar:vertical,\n.featured-preview-span::-webkit-scrollbar:vertical {\n  display: none;\n  width: 0;\n  height: 0;\n}\n.preview-span::-webkit-scrollbar-track,\n.featured-preview-span::-webkit-scrollbar-track {\n  background: transparent;\n}\n.preview-span::-webkit-scrollbar-thumb,\n.featured-preview-span::-webkit-scrollbar-thumb {\n  background: transparent;\n  border-radius: 999px;\n}\n.preview-span:hover::-webkit-scrollbar-thumb,\n.featured-preview-span:hover::-webkit-scrollbar-thumb {\n  background: rgba(0, 0, 0, 0.28);\n}\n\n/* Project tabs (Index captions + Featured metadata): hidden until sequential\n   snap-in. No transition — opacity is a step, not a fade. */\n.preview-span .preview-caption-details,\n.projects-span .div-block-248 {\n  opacity: 0;\n}\n.preview-span .preview-caption-details.project-tab-in,\n.projects-span .div-block-248.project-tab-in {\n  opacity: 1;\n}\n\n/* ====================== SILH-TITLE ====================== */\n.silh-title {\n  -webkit-user-select: none;\n     -moz-user-select: none;\n      -ms-user-select: none;\n          user-select: none;\n  -webkit-touch-callout: none;\n  -webkit-tap-highlight-color: rgba(0,0,0,0);\n  -webkit-user-drag: none;\n}\n\n.silh-title > span,\n.spawned-letter {\n  border-radius: 0;\n}\n\n.silh-title > span:focus-visible,\n.spawned-letter:focus-visible {\n  outline: none;\n  box-shadow: none;\n  border: 1px dotted #000;\n  border-radius: 0;\n}\n\n.silh-title:focus-visible {\n  outline: none;\n  box-shadow: none;\n  border: 1px dotted #000;\n  border-radius: 0;\n}\n\n.silh-title {\n  white-space: pre;\n}\n\n.silh-title > span.silh-ch-space {\n  display: inline-block;\n  width: 0.28em;\n  min-width: 0.28em;\n  pointer-events: none;\n}\n\n.updates-section .update-name,\n.updates-section .update-name .un-ghost,\n.updates-section .update-name .un-ticker,\n.updates-section .update-name .t-body-1 {\n  white-space: pre;\n}\n\n/* Mid-grey portfolio typography: ~5% load (mutually exclusive with magenta) */\nhtml.pretext-font-acacac {\n  --ui-activity-text: #acacac;\n  --ui-card-text: #acacac;\n}\nhtml.pretext-font-acacac .silh-title,\nhtml.pretext-font-acacac .spawned-letter,\nhtml.pretext-font-acacac .caption-text-a,\nhtml.pretext-font-acacac .t-body-1,\nhtml.pretext-font-acacac .project-caption,\nhtml.pretext-font-acacac .update-name,\nhtml.pretext-font-acacac .section-title {\n  color: #acacac !important;\n}\nhtml.pretext-font-acacac .nav-input-container .caption-text-a,\nhtml.pretext-font-acacac .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-acacac #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-acacac #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-acacac .update-indiv:hover .t-body-1,\nhtml.pretext-font-acacac .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-acacac .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-acacac .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n\n/* Hot pink portfolio typography: 1% load discovery or unlocked magenta panel */\nhtml.pretext-font-magenta .silh-title,\nhtml.pretext-font-magenta .spawned-letter,\nhtml.pretext-font-magenta .caption-text-a,\nhtml.pretext-font-magenta .t-body-1,\nhtml.pretext-font-magenta .project-caption,\nhtml.pretext-font-magenta .update-name,\nhtml.pretext-font-magenta .section-title,\nhtml[data-ui-bar-theme=\"magenta\"] .silh-title,\nhtml[data-ui-bar-theme=\"magenta\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"magenta\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .project-caption,\nhtml[data-ui-bar-theme=\"magenta\"] .update-name,\nhtml[data-ui-bar-theme=\"magenta\"] .section-title {\n  color: #ff0084 !important;\n}\nhtml.pretext-font-magenta .nav-input-container .caption-text-a,\nhtml.pretext-font-magenta .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-magenta #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-magenta #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"magenta\"] #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-magenta .update-indiv:hover .t-body-1,\nhtml.pretext-font-magenta .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-magenta .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"magenta\"] .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-magenta .recent-cards,\nhtml[data-ui-bar-theme=\"magenta\"] .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n\n/* Green Dragon panel — DK1 unlock or load-font after discovery */\nhtml.pretext-font-green .silh-title,\nhtml.pretext-font-green .spawned-letter,\nhtml.pretext-font-green .caption-text-a,\nhtml.pretext-font-green .t-body-1,\nhtml.pretext-font-green .project-caption,\nhtml.pretext-font-green .update-name,\nhtml.pretext-font-green .section-title,\nhtml[data-ui-bar-theme=\"green\"] .silh-title,\nhtml[data-ui-bar-theme=\"green\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"green\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"green\"] .t-body-1,\nhtml[data-ui-bar-theme=\"green\"] .project-caption,\nhtml[data-ui-bar-theme=\"green\"] .update-name,\nhtml[data-ui-bar-theme=\"green\"] .section-title {\n  color: #2e7d32 !important;\n}\nhtml.pretext-font-green .nav-input-container .caption-text-a,\nhtml.pretext-font-green .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"green\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"green\"] .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-green #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"green\"] #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-green #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"green\"] #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-green .update-indiv:hover .t-body-1,\nhtml.pretext-font-green .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-green .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"green\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"green\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"green\"] .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-green .recent-cards,\nhtml[data-ui-bar-theme=\"green\"] .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n\n/* Emboss / Aeritown panel themes + load fonts — silh-title + page typography. */\nhtml.pretext-font-tide .silh-title,\nhtml.pretext-font-tide .spawned-letter,\nhtml.pretext-font-tide .caption-text-a,\nhtml.pretext-font-tide .t-body-1,\nhtml.pretext-font-tide .project-caption,\nhtml.pretext-font-tide .update-name,\nhtml.pretext-font-tide .section-title,\nhtml[data-ui-bar-theme=\"tide\"] .silh-title,\nhtml[data-ui-bar-theme=\"tide\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"tide\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"tide\"] .t-body-1,\nhtml[data-ui-bar-theme=\"tide\"] .project-caption,\nhtml[data-ui-bar-theme=\"tide\"] .update-name,\nhtml[data-ui-bar-theme=\"tide\"] .section-title,\nhtml.pretext-font-ember .silh-title,\nhtml.pretext-font-ember .spawned-letter,\nhtml.pretext-font-ember .caption-text-a,\nhtml.pretext-font-ember .t-body-1,\nhtml.pretext-font-ember .project-caption,\nhtml.pretext-font-ember .update-name,\nhtml.pretext-font-ember .section-title,\nhtml[data-ui-bar-theme=\"ember\"] .silh-title,\nhtml[data-ui-bar-theme=\"ember\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"ember\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"ember\"] .t-body-1,\nhtml[data-ui-bar-theme=\"ember\"] .project-caption,\nhtml[data-ui-bar-theme=\"ember\"] .update-name,\nhtml[data-ui-bar-theme=\"ember\"] .section-title,\nhtml.pretext-font-shade .silh-title,\nhtml.pretext-font-shade .spawned-letter,\nhtml.pretext-font-shade .caption-text-a,\nhtml.pretext-font-shade .t-body-1,\nhtml.pretext-font-shade .project-caption,\nhtml.pretext-font-shade .update-name,\nhtml.pretext-font-shade .section-title,\nhtml[data-ui-bar-theme=\"shade\"] .silh-title,\nhtml[data-ui-bar-theme=\"shade\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"shade\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"shade\"] .t-body-1,\nhtml[data-ui-bar-theme=\"shade\"] .project-caption,\nhtml[data-ui-bar-theme=\"shade\"] .update-name,\nhtml[data-ui-bar-theme=\"shade\"] .section-title {\n  color: var(--ui-card-text, #0d47a1) !important;\n}\nhtml.pretext-font-tide,\nhtml[data-ui-bar-theme=\"tide\"] {\n  --ui-card-text: #0d47a1;\n  --ui-activity-text: #0d47a1;\n}\nhtml.pretext-font-ember,\nhtml[data-ui-bar-theme=\"ember\"] {\n  --ui-card-text: #b71c1c;\n  --ui-activity-text: #b71c1c;\n}\nhtml.pretext-font-shade,\nhtml[data-ui-bar-theme=\"shade\"] {\n  --ui-card-text: #4a148c;\n  --ui-activity-text: #4a148c;\n}\nhtml.pretext-font-tide .nav-input-container .caption-text-a,\nhtml.pretext-font-tide .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-tide #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-tide #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"tide\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"tide\"] .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"tide\"] #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"tide\"] #pretext-reading-history .caption-text-a,\nhtml.pretext-font-ember .nav-input-container .caption-text-a,\nhtml.pretext-font-ember .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-ember #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-ember #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"ember\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"ember\"] .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"ember\"] #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"ember\"] #pretext-reading-history .caption-text-a,\nhtml.pretext-font-shade .nav-input-container .caption-text-a,\nhtml.pretext-font-shade .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-shade #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-shade #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"shade\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"shade\"] .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"shade\"] #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"shade\"] #pretext-reading-history .caption-text-a,\nhtml.pretext-font-stone .nav-input-container .caption-text-a,\nhtml.pretext-font-stone .nav-input-container.top-banner .caption-text-a,\nhtml.pretext-font-stone #pretext-lotgd-forest .caption-text-a,\nhtml.pretext-font-stone #pretext-reading-history .caption-text-a,\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container .caption-text-a,\nhtml[data-ui-bar-theme=\"stone\"] .nav-input-container.top-banner .caption-text-a,\nhtml[data-ui-bar-theme=\"stone\"] #pretext-lotgd-forest .caption-text-a,\nhtml[data-ui-bar-theme=\"stone\"] #pretext-reading-history .caption-text-a {\n  color: var(--ui-bar-text) !important;\n}\nhtml.pretext-font-tide .update-indiv:hover .t-body-1,\nhtml.pretext-font-tide .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-tide .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"tide\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"tide\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"tide\"] .update-indiv.pretext-activity-open .t-body-1,\nhtml.pretext-font-ember .update-indiv:hover .t-body-1,\nhtml.pretext-font-ember .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-ember .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"ember\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"ember\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"ember\"] .update-indiv.pretext-activity-open .t-body-1,\nhtml.pretext-font-shade .update-indiv:hover .t-body-1,\nhtml.pretext-font-shade .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-shade .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"shade\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"shade\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"shade\"] .update-indiv.pretext-activity-open .t-body-1,\nhtml.pretext-font-stone .update-indiv:hover .t-body-1,\nhtml.pretext-font-stone .update-indiv.pretext-sand-hover .t-body-1,\nhtml.pretext-font-stone .update-indiv.pretext-activity-open .t-body-1,\nhtml[data-ui-bar-theme=\"stone\"] .update-indiv:hover .t-body-1,\nhtml[data-ui-bar-theme=\"stone\"] .update-indiv.pretext-sand-hover .t-body-1,\nhtml[data-ui-bar-theme=\"stone\"] .update-indiv.pretext-activity-open .t-body-1 {\n  color: var(--ui-activity-text) !important;\n}\nhtml.pretext-font-tide .recent-cards,\nhtml[data-ui-bar-theme=\"tide\"] .recent-cards,\nhtml.pretext-font-ember .recent-cards,\nhtml[data-ui-bar-theme=\"ember\"] .recent-cards,\nhtml.pretext-font-shade .recent-cards,\nhtml[data-ui-bar-theme=\"shade\"] .recent-cards,\nhtml.pretext-font-stone .recent-cards,\nhtml[data-ui-bar-theme=\"stone\"] .recent-cards {\n  color: var(--ui-card-text) !important;\n}\n/* Stone — legendary silver sweep on display titles; body ink stays readable grey. */\nhtml.pretext-font-stone .silh-title,\nhtml.pretext-font-stone .spawned-letter,\nhtml.pretext-font-stone .section-title,\nhtml[data-ui-bar-theme=\"stone\"] .silh-title,\nhtml[data-ui-bar-theme=\"stone\"] .spawned-letter,\nhtml[data-ui-bar-theme=\"stone\"] .section-title {\n  background: linear-gradient(\n    90deg,\n    #8a8a8a,\n    #1a1a1a,\n    #000000,\n    #c8c8c8,\n    #ffffff,\n    #9e9e9e,\n    #8a8a8a\n  );\n  background-size: 200% auto;\n  -webkit-background-clip: text;\n  background-clip: text;\n  color: transparent !important;\n  -webkit-text-fill-color: transparent;\n  animation: pretext-ui-bar-stone 4s linear infinite;\n}\nhtml.pretext-font-stone .caption-text-a,\nhtml.pretext-font-stone .t-body-1,\nhtml.pretext-font-stone .project-caption,\nhtml.pretext-font-stone .update-name,\nhtml[data-ui-bar-theme=\"stone\"] .caption-text-a,\nhtml[data-ui-bar-theme=\"stone\"] .t-body-1,\nhtml[data-ui-bar-theme=\"stone\"] .project-caption,\nhtml[data-ui-bar-theme=\"stone\"] .update-name {\n  color: #616161 !important;\n}\n\n/* Section headers sit above the carousel/graphic strips that follow them.\n   Shuffle (s) and stamp (;) move or scale letter spans with transforms that\n   bleed past the title row; without a lift, those glyphs paint under\n   .carouselly .cara-img { z-index: 1 } in the sibling block below. */\n.section-title {\n  position: relative;\n  z-index: 2;\n}\n";
     (document.head || document.documentElement).appendChild(st);
   }
 
@@ -43,12 +43,32 @@ function __pretextOnReady(fn) {
   } catch (e) {
     window.__pretextLoadSweepN = 0;
   }
+  function __pretextLsFlag(key) {
+    try { return window.localStorage.getItem(key) === '1'; } catch (e) { return false; }
+  }
   if (Math.random() < 0.01) {
     document.documentElement.classList.add('pretext-font-magenta');
     window.__pretextNoteLoadEffect('magenta-font');
     try {
       window.localStorage.setItem('pretext.magentaDiscovered', '1');
     } catch (e) {}
+  } else if (__pretextLsFlag('pretext.aeritownDiscovered') && Math.random() < 0.05) {
+    // Tide blue — only after Aeritown is known.
+    document.documentElement.classList.add('pretext-font-tide');
+    window.__pretextNoteLoadEffect('tide-font');
+  } else if (__pretextLsFlag('pretext.emboss.ember') && Math.random() < 0.05) {
+    document.documentElement.classList.add('pretext-font-ember');
+    window.__pretextNoteLoadEffect('ember-font');
+  } else if (__pretextLsFlag('pretext.emboss.stone') && Math.random() < 0.05) {
+    document.documentElement.classList.add('pretext-font-stone');
+    window.__pretextNoteLoadEffect('stone-font');
+  } else if (__pretextLsFlag('pretext.emboss.shade') && Math.random() < 0.05) {
+    document.documentElement.classList.add('pretext-font-shade');
+    window.__pretextNoteLoadEffect('shade-font');
+  } else if (__pretextLsFlag('pretext.greenDragonDiscovered') && Math.random() < 0.05) {
+    // Green — only after first Green Dragon kill (DK1).
+    document.documentElement.classList.add('pretext-font-green');
+    window.__pretextNoteLoadEffect('green-font');
   } else if (Math.random() < 0.05) {
     document.documentElement.classList.add('pretext-font-acacac');
     window.__pretextNoteLoadEffect('acacac-font');
@@ -984,7 +1004,8 @@ __pretextOnReady(() => {
   try {
 
 (function () {
-  /** 3 color sets — grey (default), black, magenta */
+  /** Panel color sets — grey / black + emboss (Tide / Ember / Stone / Shade) + magenta + green (DK1). */
+  var DARK_ICON = 'brightness(0) saturate(100%)';
   var UI_BAR_THEMES = [
     {
       id: 'slate',
@@ -1003,11 +1024,53 @@ __pretextOnReady(() => {
       iconFilter: 'none'
     },
     {
+      id: 'tide',
+      label: 'Tide',
+      // Sampled from Aeritown level-badge computed bg.
+      bar: '#5E98D7', barHover: '#4a86c5', barText: '#0d47a1', barBorder: '#5E98D7',
+      activityHover: '#bbdefb', activityText: '#0d47a1',
+      cardBg: '#e3f2fd', cardBorder: '#1565c0', cardText: '#0d47a1',
+      iconFilter: DARK_ICON
+    },
+    {
+      id: 'ember',
+      label: 'Ember',
+      bar: '#ef9a9a', barHover: '#e57373', barText: '#b71c1c', barBorder: '#ef9a9a',
+      activityHover: '#ffcdd2', activityText: '#b71c1c',
+      cardBg: '#ffebee', cardBorder: '#c62828', cardText: '#b71c1c',
+      iconFilter: DARK_ICON
+    },
+    {
+      id: 'stone',
+      label: 'Stone',
+      bar: '#9e9e9e', barHover: '#757575', barText: '#ffffff', barBorder: '#c8c8c8',
+      activityHover: '#e0e0e0', activityText: '#212122',
+      cardBg: '#fafafa', cardBorder: '#616161', cardText: '#212122',
+      iconFilter: 'none'
+    },
+    {
+      id: 'shade',
+      label: 'Shade',
+      bar: '#ce93d8', barHover: '#ba68c8', barText: '#4a148c', barBorder: '#ce93d8',
+      activityHover: '#e1bee7', activityText: '#4a148c',
+      cardBg: '#f3e5f5', cardBorder: '#6a1b9a', cardText: '#4a148c',
+      iconFilter: DARK_ICON
+    },
+    {
       id: 'magenta',
       label: 'Magenta',
       bar: '#ff0084', barHover: '#d9006f', barText: '#ffffff', barBorder: '#ff0084',
       activityHover: '#ffd6eb', activityText: '#4a0020',
       cardBg: '#fff0f8', cardBorder: '#ff0084', cardText: '#4a0020',
+      iconFilter: 'none'
+    },
+    {
+      id: 'green',
+      label: 'Green',
+      // Green Dragon first kill (DK1).
+      bar: '#4caf50', barHover: '#388e3c', barText: '#ffffff', barBorder: '#4caf50',
+      activityHover: '#c8e6c9', activityText: '#1b5e20',
+      cardBg: '#e8f5e9', cardBorder: '#2e7d32', cardText: '#1b5e20',
       iconFilter: 'none'
     }
   ];
@@ -1034,19 +1097,67 @@ __pretextOnReady(() => {
 
   var THEME_STORAGE_KEY = 'pretext.uiBarTheme';
   var MAGENTA_DISCOVERED_KEY = 'pretext.magentaDiscovered';
+  var AERITOWN_DISCOVERED_KEY = 'pretext.aeritownDiscovered';
+  var GREEN_DISCOVERED_KEY = 'pretext.greenDragonDiscovered';
+  var EMBOSS_UNLOCK_KEYS = {
+    tide: 'pretext.emboss.tide',
+    ember: 'pretext.emboss.ember',
+    stone: 'pretext.emboss.stone',
+    shade: 'pretext.emboss.shade'
+  };
+  var ELEMENT_TO_THEME = {
+    water: 'tide',
+    fire: 'ember',
+    earth: 'stone',
+    darkness: 'shade'
+  };
 
-  function hasMagentaDiscovered() {
+  function lsFlag(key) {
     try {
-      return window.localStorage.getItem(MAGENTA_DISCOVERED_KEY) === '1';
+      return window.localStorage.getItem(key) === '1';
     } catch (e) {
       return false;
     }
   }
 
+  function setLsFlag(key) {
+    try {
+      window.localStorage.setItem(key, '1');
+    } catch (e) {}
+  }
+
+  function hasMagentaDiscovered() {
+    return lsFlag(MAGENTA_DISCOVERED_KEY);
+  }
+
+  function hasAeritownDiscovered() {
+    return lsFlag(AERITOWN_DISCOVERED_KEY);
+  }
+
+  function hasGreenDiscovered() {
+    return lsFlag(GREEN_DISCOVERED_KEY);
+  }
+
+  function hasEmbossTheme(themeId) {
+    var key = EMBOSS_UNLOCK_KEYS[themeId];
+    return key ? lsFlag(key) : false;
+  }
+
+  function themeUnlocked(themeId) {
+    if (themeId === 'slate' || themeId === 'ink') return true;
+    if (themeId === 'magenta') return hasMagentaDiscovered();
+    if (themeId === 'green') return hasGreenDiscovered();
+    // Tide: Aeritown known, or Tide emboss forged.
+    if (themeId === 'tide') return hasAeritownDiscovered() || hasEmbossTheme('tide');
+    if (themeId === 'ember' || themeId === 'stone' || themeId === 'shade') {
+      return hasEmbossTheme(themeId);
+    }
+    return false;
+  }
+
   function availableThemes() {
-    if (hasMagentaDiscovered()) return UI_BAR_THEMES;
     return UI_BAR_THEMES.filter(function (theme) {
-      return theme.id !== 'magenta';
+      return themeUnlocked(theme.id);
     });
   }
 
@@ -1098,17 +1209,37 @@ __pretextOnReady(() => {
 
   window.UI_BAR_THEMES = UI_BAR_THEMES;
   window.applyUiBarTheme = function (id) {
-    if (id === 'magenta' && !hasMagentaDiscovered()) id = 'slate';
+    if (!themeUnlocked(id)) id = 'slate';
     var theme = themeById(id);
     applyTheme(theme);
     saveTheme(theme.id);
   };
   window.cycleUiBarTheme = cycleTheme;
   window.pretextHasMagentaDiscovered = hasMagentaDiscovered;
+  window.pretextHasAeritownDiscovered = hasAeritownDiscovered;
+  window.pretextHasGreenDiscovered = hasGreenDiscovered;
+  window.pretextUnlockAeritown = function () {
+    if (hasAeritownDiscovered()) return false;
+    setLsFlag(AERITOWN_DISCOVERED_KEY);
+    return true;
+  };
+  window.pretextUnlockGreenUi = function () {
+    if (hasGreenDiscovered()) return false;
+    setLsFlag(GREEN_DISCOVERED_KEY);
+    return true;
+  };
+  window.pretextUnlockEmboss = function (element) {
+    var themeId = ELEMENT_TO_THEME[element];
+    if (!themeId) return false;
+    var key = EMBOSS_UNLOCK_KEYS[themeId];
+    if (!key || lsFlag(key)) return false;
+    setLsFlag(key);
+    return true;
+  };
+  window.pretextThemeUnlocked = themeUnlocked;
 
   // Restore the last palette the user left it on (persisted in localStorage);
-  // fall back to grey when nothing valid is saved. Magenta stays locked until
-  // the 1% hot-pink typography roll has been discovered once.
+  // fall back to grey when nothing valid is saved. Locked sets stay out of cycle.
   applyTheme(themeById(loadSavedThemeId() || 'slate'));
 
   __pretextOnReady(function () {
@@ -3029,7 +3160,7 @@ style.textContent = `
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    background-color: var(--ui-bar);
+    background-color: var(--ui-bar) !important;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
@@ -4228,6 +4359,14 @@ function silhStairWeightActive() {
   return document.documentElement.dataset.pretextSilhStairWeight === '1';
 }
 
+function silhMonoStairActive() {
+  return document.documentElement.dataset.pretextSilhMonoStair === '1';
+}
+
+function silhSansStairActive() {
+  return document.documentElement.dataset.pretextSilhSansStair === '1';
+}
+
 function randomizeSilhTitle(title) {
   const axes = getAxesForEl(title);
   const transition =
@@ -4235,15 +4374,21 @@ function randomizeSilhTitle(title) {
       ? `font-variation-settings ${TRANSITION_MS}ms ease, font-weight ${TRANSITION_MS}ms ease`
       : '';
   const stair = silhStairWeightActive();
-  // Shared MONO/SANS roll for the title; wght stays per-letter under stair.
+  const monoStair = silhMonoStairActive();
+  const sansStair = silhSansStairActive();
+  // Shared MONO/SANS roll for the title; stair axes stay per-letter.
   const mono = axes.MONO ? pickAxisValue('MONO', title, axes) : null;
   const sans = axes.SANS ? pickAxisValue('SANS', title, axes) : null;
   const lockedW = axes.wght ? pickAxisValue('wght', title, axes) : null;
   silhAxisTargets(title).forEach((target) => {
     if (transition) target.style.transition = transition;
     const map = parseVFS(getComputedStyle(target).fontVariationSettings);
-    if (mono != null) map.MONO = mono;
-    if (sans != null) map.SANS = sans;
+    if (mono != null) {
+      map.MONO = monoStair && 'MONO' in map ? map.MONO : mono;
+    }
+    if (sans != null) {
+      map.SANS = sansStair && 'SANS' in map ? map.SANS : sans;
+    }
     if (axes.wght) {
       map.wght = stair && 'wght' in map ? map.wght : lockedW;
     }
@@ -4299,6 +4444,14 @@ function setSans(el, sans) {
   el.style.fontVariationSettings = buildVFS(map);
 }
 
+function setMono(el, mono) {
+  const cs = getComputedStyle(el);
+  const map = parseVFS(cs.fontVariationSettings);
+  if (!('wght' in map)) map.wght = FIXED_WEIGHT;
+  map.MONO = mono;
+  el.style.fontVariationSettings = buildVFS(map);
+}
+
 /** One page-wide roll on refresh: interpolate SANS/MONO to their opposite poles. */
 const SILH_REFRESH_AXIS_FLIP_CHANCE = 0.05;
 /** One page-wide roll: silh-title at the lowest wght. */
@@ -4313,6 +4466,22 @@ const SILH_STAIR_WEIGHT_STEP = 8;
  */
 const SILH_STAIR_WEIGHT_REVERSE_CHANCE = 0.05;
 const SILH_STAIR_WEIGHT_REVERSE_STEP = 10;
+/**
+ * One page-wide roll: each `.silh-title` steps +1 MONO (0→100) left→right.
+ * Force with `?silhMonoStair=1`.
+ */
+/**
+ * Off for now. Force with `?silhMonoStair=1`.
+ * Each `.silh-title` steps +1 MONO (0 proportional → 100 mono).
+ */
+const SILH_STAIR_MONO_CHANCE = 0;
+const SILH_STAIR_MONO_STEP = 1;
+/**
+ * Each `.silh-title` steps −1 SANS (100 sans → 0 serif).
+ * Force with `?silhSansStair=1`.
+ */
+const SILH_STAIR_SANS_CHANCE = 0.05;
+const SILH_STAIR_SANS_STEP = 1;
 
 function flipAxisPole(value, min, max) {
   const v = typeof value === 'number' && !Number.isNaN(value) ? value : min;
@@ -4485,13 +4654,110 @@ function maybeReverseStairWeightSilhTitlesOnLoad() {
   return true;
 }
 
+function isSilhTitleLetterNode(title) {
+  if (!title || !title.classList?.contains('silh-title')) return false;
+  const t = title.textContent || '';
+  if (!t.replace(/[\s\u200b\u200e\u200f\ufeff]/g, '').length) return false;
+  return true;
+}
+
+function silhMonoStairForced() {
+  try {
+    return new URLSearchParams(window.location.search).get('silhMonoStair') === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Sitewide: first letter title = proportional (MONO 0), then +1 MONO per `.silh-title`.
+ */
+function applySilhMonoStair() {
+  const [minM, maxM] = DEFAULT_AXES.MONO;
+  let i = 0;
+  document.querySelectorAll('.silh-title').forEach((title) => {
+    if (!isSilhTitleLetterNode(title)) return;
+    const mono = clamp(minM + i * SILH_STAIR_MONO_STEP, minM, maxM);
+    i += 1;
+    ensureSilhTitleSplitForStair(title);
+    silhAxisTargets(title).forEach((target) => {
+      if (target.classList?.contains('silh-ch-space')) return;
+      const t = target.textContent || '';
+      if (!t.replace(/[\s\u200b\u200e\u200f\ufeff]/g, '').length) return;
+      setMono(target, mono);
+    });
+  });
+}
+
+function scheduleSilhMonoStairApply() {
+  document.documentElement.dataset.pretextSilhMonoStair = '1';
+  requestAnimationFrame(() => {
+    applySilhMonoStair();
+    document.querySelectorAll('.silh-title, .spawned-letter').forEach(cacheSilhTitle);
+  });
+}
+
+function maybeMonoStairSilhTitlesOnLoad() {
+  const forced = silhMonoStairForced();
+  if (!forced && Math.random() >= SILH_STAIR_MONO_CHANCE) return false;
+  window.__pretextNoteLoadEffect?.('silh-stair-mono');
+  scheduleSilhMonoStairApply();
+  return true;
+}
+
+function silhSansStairForced() {
+  try {
+    return new URLSearchParams(window.location.search).get('silhSansStair') === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+/**
+ * Sitewide: first letter title = sans (SANS 100), then −1 SANS per `.silh-title` toward serif.
+ */
+function applySilhSansStair() {
+  const [minS, maxS] = DEFAULT_AXES.SANS;
+  let i = 0;
+  document.querySelectorAll('.silh-title').forEach((title) => {
+    if (!isSilhTitleLetterNode(title)) return;
+    const sans = clamp(maxS - i * SILH_STAIR_SANS_STEP, minS, maxS);
+    i += 1;
+    ensureSilhTitleSplitForStair(title);
+    silhAxisTargets(title).forEach((target) => {
+      if (target.classList?.contains('silh-ch-space')) return;
+      const t = target.textContent || '';
+      if (!t.replace(/[\s\u200b\u200e\u200f\ufeff]/g, '').length) return;
+      setSans(target, sans);
+    });
+  });
+}
+
+function scheduleSilhSansStairApply() {
+  document.documentElement.dataset.pretextSilhSansStair = '1';
+  requestAnimationFrame(() => {
+    applySilhSansStair();
+    document.querySelectorAll('.silh-title, .spawned-letter').forEach(cacheSilhTitle);
+  });
+}
+
+function maybeSansStairSilhTitlesOnLoad() {
+  const forced = silhSansStairForced();
+  if (!forced && Math.random() >= SILH_STAIR_SANS_CHANCE) return false;
+  window.__pretextNoteLoadEffect?.('silh-stair-sans');
+  scheduleSilhSansStairApply();
+  return true;
+}
+
 function finalizeSilhAxisLoadState() {
   maybeFlipSilhAxesOnLoad();
   maybeMinWeightSilhTitlesOnLoad();
-  // Independent rolls; if both land, reverse applies second and wins.
+  // Independent rolls; if both weight stairs land, reverse applies second and wins.
   const stairUp = maybeStairWeightSilhTitlesOnLoad();
   const stairDown = maybeReverseStairWeightSilhTitlesOnLoad();
-  if (!stairUp && !stairDown) {
+  const monoStair = maybeMonoStairSilhTitlesOnLoad();
+  const sansStair = maybeSansStairSilhTitlesOnLoad();
+  if (!stairUp && !stairDown && !monoStair && !sansStair) {
     document.querySelectorAll('.silh-title, .spawned-letter').forEach(cacheSilhTitle);
   }
 }
@@ -4588,6 +4854,7 @@ scheduleSilhAxisFlipOnLoad();
     }
   }
   function adjustSans(delta) {
+    if (silhSansStairActive()) return;
     const [minS, maxS] = DEFAULT_AXES.SANS;
     FIXED_SANS = clamp(FIXED_SANS + delta, minS, maxS);
     titles.forEach(el => setSilhTitleSans(el, FIXED_SANS));
