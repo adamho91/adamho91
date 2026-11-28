@@ -1,0 +1,13 @@
+{
+  "name": "@fal-slides/brand",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./tokens.ts",
+  "exports": {
+    ".": "./tokens.ts",
+    "./tokens.css": "./tokens.css",
+    "./logos/*": "./logos/*",
+    "./fonts/*": "./fonts/*"
+  }
+}

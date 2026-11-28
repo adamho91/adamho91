@@ -1,0 +1,14 @@
+{
+  "name": "fal-slides",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @fal-slides/web",
+    "build": "npm run build -w @fal-slides/web",
+    "preview": "npm run preview -w @fal-slides/web"
+  }
+}
